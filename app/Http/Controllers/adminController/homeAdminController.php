@@ -66,7 +66,7 @@ class homeAdminController extends Controller
 
         // dd($pesananMasuk);
 
-        return view('admin.dashboard', compact(
+        return view('Admin.dashboard', compact(
             'labels',
             'data',
             'totalRevenue',
