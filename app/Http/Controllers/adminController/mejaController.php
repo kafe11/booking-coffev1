@@ -16,7 +16,7 @@ class mejaController extends Controller
         {
             $mejaIndoor = Meja::where('ruangan', 'Indoor')->orWhere('ruangan', 'Indoor')->get();
             $mejaOutdoor = Meja::where('ruangan', 'Outdoor')->get();
-            return view('admin.dataMeja', compact('mejaIndoor', 'mejaOutdoor'));
+            return view('Admin.dataMeja', compact('mejaIndoor', 'mejaOutdoor'));
         }
 
         /**
