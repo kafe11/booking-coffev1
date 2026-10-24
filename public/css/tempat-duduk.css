@@ -1,0 +1,20 @@
+.material-icons {
+  font-size: inherit;
+  vertical-align: middle;
+}
+
+body {
+  --tw-bg-opacity: 1;
+  background-color: rgb(245 243 240 / var(--tw-bg-opacity));
+}
+
+.dark body {
+  --tw-bg-opacity: 1;
+  background-color: rgb(44 37 34 / var(--tw-bg-opacity));
+}
+
+.selected {
+        background-color: #4f46e5 !important;
+        color: white !important;
+        border-color: #4f46e5 !important;
+    }
