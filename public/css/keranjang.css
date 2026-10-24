@@ -1,0 +1,89 @@
+.keranjang-container {
+    max-width: 900px;
+    margin: auto;
+}
+
+.grid-keranjang {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.item-card {
+    display: flex;
+    align-items: center;
+    max-width: 250px;
+    border: 1px solid #cecece;
+    padding: 12px;
+    border-radius: 10px;
+    background: #fff;
+}
+
+.menu-img {
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
+    margin-right: 15px;
+    object-fit: cover;
+    background: #ddd;
+}
+
+.item-info {
+    flex-grow: 1;
+    font-size: 14px;
+}
+
+.delete-btn {
+    /* margin-top: 5px; */
+    display: flex;
+    color: red;
+    /* justify-content: space-between; */
+    align-items: center;
+    cursor: pointer;
+}
+
+.qty-box {
+    /* margin-top: 5px; */
+    margin-left: 2px;
+    padding: 3px 8px;
+    border: 1px solid #888;
+    display: inline-block;
+    border-radius: 5px;
+}
+
+.item-check {
+    width: 18px;
+    height: 18px;
+    margin-left: 10px;
+}
+
+.bottom-section {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 50px;
+}
+
+.reservasi-btn {
+    padding: 8px 15px;
+    background: black;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+form {
+    display: flex;
+    align-items: center;
+}
+
+.qty-input {
+    margin-left: 5px;
+    max-height: 20px;
+    padding: 10px 5px !important;
+    max-width: 35px;
+    /* border: none; */
+    /* display: flex; */
+}
