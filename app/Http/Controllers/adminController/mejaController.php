@@ -25,7 +25,7 @@ class mejaController extends Controller
 
         public function showFormMeja()
         {
-            return view('admin.tambahMeja');
+            return view('Admin.tambahMeja');
         }
 
 
