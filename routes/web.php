@@ -10,7 +10,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PesananController;
-use App\Http\Controllers\regisController;
+use App\Http\Controllers\RegisController;
 use App\Http\Controllers\reservasiController;
 use App\Http\Controllers\XenditCallbackController;
 // use Illuminate\Foundation\Configuration\Middleware;
