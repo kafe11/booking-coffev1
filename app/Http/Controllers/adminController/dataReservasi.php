@@ -44,7 +44,7 @@ class dataReservasi extends Controller
 
         // dd($reservasi);
 
-        return view('admin.riwayat', compact('reservasi', 'search'));
+        return view('Admin.riwayat', compact('reservasi', 'search'));
     }
 
 
