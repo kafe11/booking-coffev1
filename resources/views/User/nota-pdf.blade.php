@@ -50,7 +50,7 @@
         <strong>Informasi Tempat & Reservasi:</strong><br>
         • ID RESERVASI: #{{ $reservasi->id_reservasi }}<br>
         • Ruangan: {{ $ruangan == 'Indoor' ? 'indoor':$ruangan }}<br>
-        • Nomor Meja: {{ $meja ?? '-' }}<br>
+        • Nomor Meja: {{ $meja ?: '-' }}<br>
         • Tanggal Reservasi: {{ date('d M Y', strtotime($reservasi->tanggal)) }}
     </div>
     @endif
