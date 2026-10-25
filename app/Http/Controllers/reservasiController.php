@@ -128,8 +128,8 @@ class reservasiController extends Controller
         if ($totalQty < $jumlahTamu) {
             return back()->with('gagal', 'pastikan setiap tamu memesan makanan atau minuman minimal 1 pesanan, total pesanan anda: ' . $totalQty . ' total tamu yang anda inputkan ' . $jumlahTamu);
         }
-        if ($jumlahTamu > 10) {
-            return back()->with('gagal', 'Jumlah tamu maximal 10.');
+        if ((int) $jumlahTamu < 1) {
+            return back()->with('gagal', 'Jumlah tamu minimal 1 orang.');
         }
         if ($jumlahTamu == 1 && $totalQty < 2) {
             return back()->with('gagal', 'pastikan jika Jumlah tamu 1, maka total pesanan minimal 2');
@@ -207,7 +207,7 @@ class reservasiController extends Controller
             ->join('reservasi_meja', 'reservasi.id_reservasi', '=', 'reservasi_meja.id_reservasi')
             ->join('transaksi', 'transaksi.id_reservasi', '=', 'reservasi.id_reservasi')
             ->whereDate('reservasi.tanggal', $tanggal)
-            ->whereIn(DB::raw('LOWER(transaksi.status)'), ['menunggu', 'tervalidasi'])
+            ->whereIn(DB::raw('LOWER(transaksi.status)'), ['menunggu', 'tervalidasi', 'selesai'])
             ->select('reservasi_meja.id_meja', 'reservasi.tanggal', 'reservasi.waktu')
             ->get();
 
