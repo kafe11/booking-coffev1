@@ -79,6 +79,21 @@ class PaymentController extends Controller
             }
         }
 
+        // Recheck availability before creating an invoice. The same check is
+        // repeated under row locks inside the reservation transaction below.
+        if (!$id_pengelola) {
+            $guestCount = (int) ($dataReservasi['jumlahTamu'] ?? $dataReservasi['jumlah_tamu'] ?? 1);
+            $availableIds = app(\App\Support\TableAvailability::class)
+                ->selectTableIds((string) $ruangan, (string) $dataReservasi['tanggal'], (string) $dataReservasi['waktu'], $guestCount);
+            if (empty($availableIds)) {
+                return redirect()->route('reservasi')
+                    ->with('gagal', 'Meja pada area tersebut tidak lagi mencukupi. Silakan pilih waktu atau area lain.');
+            }
+            $mejaDipilih = $availableIds;
+        } else {
+            $mejaDipilih = is_array($mejaDipilih) ? $mejaDipilih : [$mejaDipilih];
+        }
+
         // Siapkan data untuk invoice
         foreach ($keranjang as $item) {
             $variasi = $item['variasi'] ?? [[
@@ -155,7 +170,22 @@ class PaymentController extends Controller
             $urlGagal = url(route('admin.transaksiLangsung'));;
         }
 
+        DB::beginTransaction();
+
         try {
+            // Lock and revalidate table rows before creating the invoice. Locks
+            // remain held until the reservation and pivot rows are committed.
+            if (!$id_pengelola) {
+                $guestCount = (int) ($dataReservasi['jumlahTamu'] ?? $dataReservasi['jumlah_tamu'] ?? 1);
+                $mejaDipilih = app(\App\Support\TableAvailability::class)
+                    ->selectTableIds((string) $ruangan, (string) $dataReservasi['tanggal'], (string) $dataReservasi['waktu'], $guestCount, true);
+                if (empty($mejaDipilih)) {
+                    DB::rollBack();
+                    return redirect()->route('reservasi')
+                        ->with('gagal', 'Meja baru saja dipesan pelanggan lain. Silakan pilih waktu atau area lain.');
+                }
+            }
+
             // KIRIM KE XENDIT UNTUK BUAT INVOICE
             $apiInstance = new InvoiceApi();
             $createInvoiceRequest = new CreateInvoiceRequest([
@@ -180,8 +210,6 @@ class PaymentController extends Controller
             // primary key id_reservasi (bukan primary key default `id`).
             // XENDIT_PENDING menjaga kompatibilitas dengan database lama yang
             // masih memiliki bukti_pembayaran NOT NULL.
-            DB::beginTransaction();
-
             $reservasiData = [
                 'id_pelanggan'     => $id_pelanggan,
                 'tanggal'          => $dataReservasi['tanggal'],
@@ -199,10 +227,14 @@ class PaymentController extends Controller
 
             $id_reservasi = $reservasi->getKey();
 
-            DB::table('reservasi_meja')->insert([
-                'id_reservasi'     => $id_reservasi,
-                'id_meja'          => $mejaDipilih,
-            ]);
+            $pivotRows = [];
+            foreach ((array) $mejaDipilih as $tableId) {
+                $pivotRows[] = [
+                    'id_reservasi' => $id_reservasi,
+                    'id_meja' => $tableId,
+                ];
+            }
+            DB::table('reservasi_meja')->insert($pivotRows);
 
             DB::table('transaksi')->insert([
                 'id_transaksi'      => $externalId,

@@ -141,6 +141,19 @@ class XenditCallbackController extends Controller
                     return 'duplicate';
                 }
 
+                // If payment arrives after the 30-minute invoice window, do not
+                // silently resurrect a reservation whose table may already have
+                // been reallocated. Payment needs manual reconciliation/refund.
+                if (!empty($order->created_at)
+                    && \Illuminate\Support\Carbon::parse($order->created_at)
+                        ->addMinutes(30)->lessThanOrEqualTo(now())) {
+                    Log::warning('Pembayaran DP diterima setelah batas waktu invoice; perlu pemeriksaan manual.', [
+                        'external_id' => $externalId,
+                        'id_transaksi' => $transactionId,
+                    ]);
+                    return 'late_paid_requires_review';
+                }
+
                 $this->processUnreservedStock($transactionId);
 
                 DB::table('transaksi')
