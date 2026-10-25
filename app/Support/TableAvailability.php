@@ -4,18 +4,15 @@ namespace App\Support;
 
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Collection;
 use RuntimeException;
 
 /**
  * Centralized availability rules for customer table allocation.
  *
- * The current schema has no per-table capacity column, so capacity is kept
- * as a business rule (4 guests per table) until the cafe defines capacities.
+ * Table capacity is configured per table in the admin data-meja page.
  */
 class TableAvailability
 {
-    public const GUESTS_PER_TABLE = 4;
     public const RESERVATION_HOURS = 2;
     public const PAYMENT_HOLD_MINUTES = 30;
 
@@ -26,9 +23,35 @@ class TableAvailability
      */
     public function selectTableIds(string $room, string $date, string $time, int $guests, bool $lock = false): array
     {
-        $required = max(1, (int) ceil($guests / self::GUESTS_PER_TABLE));
-        $available = $this->availableTableIds($room, $date, $time, $lock);
-        return count($available) >= $required ? array_slice($available, 0, $required) : [];
+        if ($guests < 1) {
+            return [];
+        }
+
+        $availableIds = $this->availableTableIds($room, $date, $time, $lock);
+        if (empty($availableIds)) {
+            return [];
+        }
+
+        // Prefer a combination with less unused capacity by considering smaller
+        // available tables first. All selected tables remain in the same room.
+        $tables = DB::table('meja')
+            ->whereIn('id_meja', $availableIds)
+            ->orderBy('kapasitas')
+            ->orderBy('id_meja')
+            ->get(['id_meja', 'kapasitas']);
+
+        $selected = [];
+        $capacity = 0;
+        foreach ($tables as $table) {
+            $selected[] = $table->id_meja;
+            $capacity += (int) $table->kapasitas;
+
+            if ($capacity >= $guests) {
+                return $selected;
+            }
+        }
+
+        return [];
     }
 
     public function availableTableIds(string $room, string $date, string $time, bool $lock = false): array

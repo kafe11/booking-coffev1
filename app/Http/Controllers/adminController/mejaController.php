@@ -8,55 +8,59 @@ use App\Models\Meja;
 
 class mejaController extends Controller
 {
-        /**
-        * MENAMBAHKAN DATA MEJA
-        */
+    public function showMeja()
+    {
+        $mejaIndoor = Meja::where('ruangan', 'Indoor')->orderBy('kode_meja')->get();
+        $mejaOutdoor = Meja::where('ruangan', 'Outdoor')->orderBy('kode_meja')->get();
 
-        public function showMeja()
-        {
-            $mejaIndoor = Meja::where('ruangan', 'Indoor')->orWhere('ruangan', 'Indoor')->get();
-            $mejaOutdoor = Meja::where('ruangan', 'Outdoor')->get();
-            return view('Admin.dataMeja', compact('mejaIndoor', 'mejaOutdoor'));
-        }
+        return view('Admin.dataMeja', compact('mejaIndoor', 'mejaOutdoor'));
+    }
 
-        /**
-        * MENAMBAHKAN DATA MEJA
-        */
+    public function showFormMeja()
+    {
+        return view('Admin.tambahMeja');
+    }
 
-        public function showFormMeja()
-        {
-            return view('Admin.tambahMeja');
-        }
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'kode_meja' => 'required|string|max:255|unique:meja,kode_meja',
+            'ruangan' => 'required|in:Indoor,Outdoor',
+            'kapasitas' => 'required|integer|min:1|max:100',
+        ]);
 
+        Meja::create($validated);
 
-        public function store(Request $request)
-        {
-            $request->validate([
-                'kode_meja' => 'required|unique:meja,kode_meja',
-                'ruangan'  => 'required|string',
-            ]);
+        return redirect()->route('dataMeja.showMeja')->with('success', 'Meja berhasil ditambahkan.');
+    }
 
-            $meja = Meja::create([
-                'kode_meja' => $request->kode_meja,
-                'ruangan'  => $request->ruangan,
-            ]);
+    public function edit($id)
+    {
+        $meja = Meja::findOrFail($id);
 
-            return redirect()
-                ->route('dataMeja.showMeja')
-                ->with('success', 'Meja berhasil ditambahkan');
-        }
+        return view('Admin.editMeja', compact('meja'));
+    }
 
+    public function update(Request $request, $id)
+    {
+        $meja = Meja::findOrFail($id);
 
-        /**
-         * MENGHAPUS DATA MEJA
-         */
-        public function destroy($id)
-        {
-            $meja = Meja::findOrFail($id);
-            $meja->delete();
+        $validated = $request->validate([
+            'kode_meja' => 'required|string|max:255|unique:meja,kode_meja,' . $meja->id_meja . ',id_meja',
+            'ruangan' => 'required|in:Indoor,Outdoor',
+            'kapasitas' => 'required|integer|min:1|max:100',
+        ]);
 
-            return redirect()
-                ->back()
-                ->with('success', 'Meja berhasil dihapus');
-        }
+        $meja->update($validated);
+
+        return redirect()->route('dataMeja.showMeja')->with('success', 'Data meja berhasil diperbarui.');
+    }
+
+    public function destroy($id)
+    {
+        $meja = Meja::findOrFail($id);
+        $meja->delete();
+
+        return redirect()->back()->with('success', 'Meja berhasil dihapus.');
+    }
 }

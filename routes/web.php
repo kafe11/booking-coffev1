@@ -177,6 +177,8 @@ Route::get('/admin/form-meja', [MejaController::class, 'showFormMeja'])->name('d
 
 
 Route::post('/admin/data-meja', [mejaController::class, 'store'])->name('dataMeja.store');
+Route::get('/admin/data-meja/{id}/edit', [mejaController::class, 'edit'])->name('dataMeja.edit');
+Route::put('/admin/data-meja/{id}', [mejaController::class, 'update'])->name('dataMeja.update');
 Route::delete('/admin/data-meja/{id}/hapus', [mejaController::class, 'destroy'])->name('dataMeja.destroy');
 // Route::post('/admin/data-meja/add/', [dataReservasi::class, 'dataMeja'])->name('dataMeja.add');
 
