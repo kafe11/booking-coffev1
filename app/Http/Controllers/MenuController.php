@@ -296,7 +296,6 @@ class MenuController extends Controller
     {
         $userId = session('id_pelanggan');
         $cartKey = 'keranjang_' . $userId;
-
         $keranjang = session($cartKey, []);
 
         if (!isset($keranjang[$index])) {
@@ -304,28 +303,51 @@ class MenuController extends Controller
         }
 
         $menu = menuModel::findOrFail($keranjang[$index]['id']);
-        $qty = max(1, (int) $request->qty);
-
-        if ($qty > $menu->stok) {
-            $qty = $menu->stok;
+        $qty = max(1, (int) $request->input('qty', 1));
+        if ($qty > (int) $menu->stok) {
+            $qty = (int) $menu->stok;
         }
 
-        $keranjang[$index]['qty'] = $qty;
         $keranjang[$index]['stok'] = $menu->stok;
         $keranjang[$index]['kategori'] = $menu->kategori;
+        $variasi = $keranjang[$index]['variasi'] ?? [[
+            'catatan' => $keranjang[$index]['catatan'] ?? '-',
+            'qty' => (int) ($keranjang[$index]['qty'] ?? 1),
+        ]];
 
-        if ($menu->kategori === 'minuman') {
-            $options = $request->only(['temperature', 'sugar_level', 'ice_level']);
-            $keranjang[$index]['options'] = $this->normalizeDrinkOptions(
-                !empty($options) ? $options : ($keranjang[$index]['options'] ?? [])
-            );
+        $totalLama = array_sum(array_map(fn ($v) => (int) ($v['qty'] ?? 0), $variasi));
+        $selisih = $qty - $totalLama;
+        if ($selisih > 0) {
+            $lastIndex = count($variasi) - 1;
+            $variasi[$lastIndex]['qty'] = (int) ($variasi[$lastIndex]['qty'] ?? 0) + $selisih;
+        } elseif ($selisih < 0) {
+            $kurangi = abs($selisih);
+            for ($i = count($variasi) - 1; $i >= 0 && $kurangi > 0; $i--) {
+                $tersedia = (int) ($variasi[$i]['qty'] ?? 0);
+                $potong = min($tersedia, $kurangi);
+                $variasi[$i]['qty'] = $tersedia - $potong;
+                $kurangi -= $potong;
+            }
+            $variasi = array_values(array_filter($variasi, fn ($v) => (int) ($v['qty'] ?? 0) > 0));
         }
+
+        if (empty($variasi)) {
+            $variasi = [[
+                'catatan' => $keranjang[$index]['catatan'] ?? '-',
+                'qty' => 1,
+            ]];
+            $qty = 1;
+        }
+
+        $keranjang[$index]['variasi'] = array_values($variasi);
+        $keranjang[$index]['qty'] = array_sum(array_map(fn ($v) => (int) $v['qty'], $variasi));
+        $keranjang[$index]['catatan'] = $variasi[0]['catatan'] ?? '-';
 
         session()->put($cartKey, $keranjang);
 
         return response()->json([
             'success' => true,
-            'qty' => $qty,
+            'qty' => $keranjang[$index]['qty'],
             'options' => $keranjang[$index]['options'] ?? [],
         ]);
     }
