@@ -188,7 +188,7 @@ class reservasiController extends Controller
         $mejaIndoor = \Illuminate\Support\Facades\DB::table('meja')
             ->where('ruangan', 'Indoor')->orderBy('id_meja')->get()
             ->map(function ($meja) use ($availability, $tanggal, $waktu, $jumlahTamu) {
-                $available = $availability->selectTableIds('Indoor', $tanggal, $waktu, $jumlahTamu);
+                $available = $availability->availableTableIds('Indoor', $tanggal, $waktu);
                 $meja->status = in_array($meja->id_meja, $available, false) ? 'KOSONG' : 'TERBOOKING';
                 return $meja;
             });
@@ -196,7 +196,7 @@ class reservasiController extends Controller
         $mejaOutdoor = \Illuminate\Support\Facades\DB::table('meja')
             ->where('ruangan', 'Outdoor')->orderBy('id_meja')->get()
             ->map(function ($meja) use ($availability, $tanggal, $waktu, $jumlahTamu) {
-                $available = $availability->selectTableIds('Outdoor', $tanggal, $waktu, $jumlahTamu);
+                $available = $availability->availableTableIds('Outdoor', $tanggal, $waktu);
                 $meja->status = in_array($meja->id_meja, $available, false) ? 'KOSONG' : 'TERBOOKING';
                 return $meja;
             });
