@@ -161,7 +161,7 @@ Route::delete('/admin/hapus-reservasi/{id}', [dataReservasi::class, 'hapusReserv
 Route::get('/admin/data-reservasi/{id}/detail', [dataReservasi::class, 'detail'])->name('detailReservasi');
 Route::get('/admin/data-reservasi/{id}/detail-json', [dataReservasi::class, 'detailJson']);
 Route::post('/admin/transaksi/{id}/validasi', [dataReservasi::class, 'validasiTransaksi'])->name('transaksi.validasi');
-Route::post('/admin/reservasi/{id}/kehadiran', [dataReservasi::class, 'konfirmasiKehadiran'])->name('reservasi.kehadiran');
+// Konfirmasi kehadiran sekarang dilakukan oleh pelanggan melalui riwayat transaksi.
 Route::delete('/admin/transaksi/{id}/hapus', [dataReservasi::class, 'hapusTransaksi'])->name('transaksi.hapus');
 Route::post('/admin/transaksi-selesai', [dataReservasi::class, 'ubahStatusTransaksi'])->name('kosongkan.meja');
 Route::get('/admin/data-reservasi/tambah-menu/{id}', [PaymentController::class, 'TambahanMenu'])->name('tambahan-menu');
