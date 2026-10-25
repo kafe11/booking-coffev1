@@ -114,7 +114,7 @@
                                     <div class="flex flex-wrap items-center justify-between gap-2">
                                         <div class="text-xs text-gray-600 dark:text-gray-300">
                                             <span class="font-semibold">Tanggal reservasi:</span>
-                                            {{ \\Illuminate\\Support\\Carbon::parse($transaksi->tanggal_reservasi)->format('d M Y') }}
+                                            {{ \Illuminate\Support\Carbon::parse($transaksi->tanggal_reservasi)->format('d M Y') }}
                                             @if ($transaksi->waktu_reservasi)
                                                 · {{ substr((string) $transaksi->waktu_reservasi, 0, 5) }}
                                             @endif
