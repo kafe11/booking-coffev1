@@ -1,6 +1,5 @@
 <?php
 
-// app/Models/Meja.php
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,12 +13,9 @@ class Meja extends Model
     protected $primaryKey = 'id_meja';
     public $incrementing = true;
 
+    protected $fillable = ['kode_meja', 'ruangan', 'kapasitas'];
 
-    protected $fillable = [
-        'kode_meja',
-        'ruangan',
-    ];
-
+    protected $casts = ['kapasitas' => 'integer'];
 
     public function reservasi()
     {
@@ -33,11 +29,6 @@ class Meja extends Model
 
     public function reservasiMeja()
     {
-        return $this->hasMany(
-            ReservasiMeja::class,
-            'id_meja',
-            'id_meja'
-        );
+        return $this->hasMany(ReservasiMeja::class, 'id_meja', 'id_meja');
     }
 }
-
