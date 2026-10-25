@@ -249,98 +249,94 @@ class reservasiController extends Controller
 
     public function pilihTempatDuduk(Request $request)
     {
+        $request->validate([
+            'ruangan' => 'required|in:Indoor,Outdoor',
+        ]);
+
         $id_pengelola = Session::get('id_pengelola');
 
-        // dd($request->all());
-
-        // $inputMeja = $request->id_meja;
-
-
-        // $jumlahMeja = Session::get('dataReservasi')['jumlahMeja'];
-        // $mejaDipilih = Session::get('mejaDipilih', []);
-
-
-        // // cek apakah meja yg d inputkan sesuai dengan data jumlh meja di reservasi
-        // if (count($request->id_meja) > $jumlahMeja || count($request->id_meja) < $jumlahMeja) {
-        //     return back()->with('gagal', 'Pilih ' . $jumlahMeja . ' meja');
-        // }
-
-        // // array penyimpan data meja dan ruangan sementara
-        // $mejaBaru = [];
-
-        // for ($i = 0; $i < $jumlahMeja; $i++) {
-        //     $data = DB::table('meja')
-        //         ->where('kode_meja', $inputMeja[$i])
-        //         ->select('ruangan')
-        //         ->first();
-
-        //     // dd($data->ruangan);
-
-        //     if ($data->ruangan === 'Indoor') {
-        //         array_push($mejaBaru, [
-        //             'ruangan' => $data->ruangan,
-        //             'kode_meja'   => $inputMeja[$i],
-        //         ]);
-        //     } else {
-        //         array_push($mejaBaru, [
-        //             'ruangan' => $data->ruangan,
-        //             'kode_meja'   => $inputMeja[$i],
-        //         ]);
-        //     }
-        // }
-
         if ($id_pengelola != null) {
-            # code...
-            $waktuSession = now()->format('H:i:s');
-            $tanggalSession = now()->format('Y-m-d');
+            // Alur kasir tetap menggunakan satu meja dan waktu saat ini.
+            $waktuReservasi = now();
             $daftarBarang = json_decode($request->items, true);
-            // dd($daftarBarang);
-            session::put('keranjangKasir', $daftarBarang);
-            // session(['keranjangKasir' => $daftarBarang]);
+            Session::put('keranjangKasir', $daftarBarang);
+            $tanggalReservasi = $waktuReservasi->toDateString();
+            $jamReservasi = $waktuReservasi->format('H:i:s');
+            $jumlahTamu = 1;
         } else {
-            $waktuSession = Session::get('dataReservasi')['waktu'];
-            $tanggalSession = Session::get('dataReservasi')['tanggal'];
+            $dataReservasi = Session::get('dataReservasi');
+            if (empty($dataReservasi)) {
+                return redirect()->route('reservasi')
+                    ->with('gagal', 'Silakan isi form reservasi terlebih dahulu.');
+            }
+
+            $tanggalReservasi = $dataReservasi['tanggal'];
+            $jamReservasi = $dataReservasi['waktu'];
+            $jumlahTamu = (int) ($dataReservasi['jumlahTamu'] ?? $dataReservasi['jumlah_tamu'] ?? 1);
+            if (strlen($jamReservasi) === 5) {
+                $jamReservasi .= ':00';
+            }
         }
 
-        // dd($request->all());
+        // Kapasitas meja mengikuti aturan aplikasi yang sudah ada: maksimal 4 tamu per meja.
+        $jumlahMejaDibutuhkan = max(1, (int) ceil($jumlahTamu / 4));
+        $mulaiReservasi = Carbon::parse($tanggalReservasi . ' ' . $jamReservasi);
+        $selesaiReservasi = $mulaiReservasi->copy()->addHours(2);
 
-        // Jika session hanya 5 karakter (contoh: "10:00"), tambahkan ":00" agar menjadi "10:00:00"
-        if (strlen($waktuSession) == 5) {
-            $waktuSession .= ':00';
+        // Status transaksi yang sudah dipakai aplikasi. Status gagal/batal/expired tidak menahan meja.
+        // Ambil reservasi pada tanggal target dan sehari sebelumnya untuk menangani reservasi lintas tengah malam.
+        $reservasiTerkait = DB::table('reservasi_meja')
+            ->join('reservasi', 'reservasi_meja.id_reservasi', '=', 'reservasi.id_reservasi')
+            ->leftJoin('transaksi', 'reservasi.id_reservasi', '=', 'transaksi.id_reservasi')
+            ->whereBetween('reservasi.tanggal', [
+                $mulaiReservasi->copy()->subDay()->toDateString(),
+                $mulaiReservasi->toDateString(),
+            ])
+            ->where(function ($query) {
+                $query->whereIn('transaksi.status', ['menunggu', 'tervalidasi', 'selesai'])
+                    ->orWhereNull('transaksi.status');
+            })
+            ->select(
+                'reservasi_meja.id_meja',
+                'reservasi.tanggal',
+                'reservasi.waktu'
+            )
+            ->get();
+
+        $mejaTerpakai = [];
+        foreach ($reservasiTerkait as $reservasiLama) {
+            $mulaiLama = Carbon::parse($reservasiLama->tanggal . ' ' . $reservasiLama->waktu);
+            $selesaiLama = $mulaiLama->copy()->addHours(2);
+
+            if ($mulaiLama->lt($selesaiReservasi) && $selesaiLama->gt($mulaiReservasi)) {
+                $mejaTerpakai[] = $reservasiLama->id_meja;
+            }
         }
 
-        // menentukan meja yang dipilih
-        $mejaDipilih = DB::table('meja')
+        $mejaTersedia = DB::table('meja')
             ->where('ruangan', $request->ruangan)
-            ->whereNotIn('id_meja', function ($query) use ($request, $waktuSession, $tanggalSession) {
-                $query->select('reservasi_meja.id_meja')
-                    ->from('reservasi_meja')
-                    ->join('reservasi', 'reservasi_meja.id_reservasi', '=', 'reservasi.id_reservasi')
-                    ->join('transaksi', 'reservasi_meja.id_reservasi', '=', 'transaksi.id_reservasi')
-                    ->where('reservasi.ruangan', $request->ruangan)
-                    ->where('reservasi.tanggal', $tanggalSession)
-                    ->where('reservasi.waktu', $waktuSession)
-                    ->where(function ($q) {
-                        $q->whereIn('transaksi.status', ['tervalidasi', 'menunggu'])
-                            ->orWhereNull('transaksi.status'); // Tangkap jika transaksi belum di-input ke DB
-                    });
-            });
+            ->when(!empty($mejaTerpakai), function ($query) use ($mejaTerpakai) {
+                $query->whereNotIn('id_meja', array_unique($mejaTerpakai));
+            })
+            ->orderBy('id_meja')
+            ->limit($jumlahMejaDibutuhkan)
+            ->pluck('id_meja')
+            ->map(fn ($id) => (int) $id)
+            ->values()
+            ->all();
 
-        // dd($mejaDipilih);
-        if ($mejaDipilih->get()->isEmpty()) {
-            return back()->with('gagal', 'Maaf, tidak ada meja yang tersedia di ruangan ' . $request->ruangan . ' untuk waktu yang dipilih.');
+        if (count($mejaTersedia) < $jumlahMejaDibutuhkan) {
+            return back()->with(
+                'gagal',
+                'Meja di area ' . $request->ruangan . ' tidak mencukupi untuk ' . $jumlahTamu .
+                ' tamu pada waktu tersebut. Silakan kurangi jumlah tamu atau pilih waktu lain.'
+            );
         }
 
-        // dd($mejaDipilih->get());
+        Session::put('mejaDipilih', $mejaTersedia);
+        Session::put('RuanganDipilih', $request->ruangan);
 
-        session::put('mejaDipilih', $mejaDipilih->first()->id_meja);
-        session(['RuanganDipilih' => $request->ruangan]);
-
-        // dd($mejaDipilih->first()->id_meja);
-        // // Jika sudah cukup → lanjut ke detail pesanan
-        // return redirect()->route('detail-pesanan');
         return redirect()->route('checkout');
-        // // return redirect()->route('detail-pesanan')->with('success', 'Semua meja berhasil dipilih!');
     }
 
 
