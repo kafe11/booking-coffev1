@@ -185,19 +185,20 @@ class reservasiController extends Controller
         $waktu = $data['waktu'];
         $availability = app(\App\Support\TableAvailability::class);
 
+        $availableIndoor = $availability->availableTableIds('Indoor', $tanggal, $waktu);
+        $availableOutdoor = $availability->availableTableIds('Outdoor', $tanggal, $waktu);
+
         $mejaIndoor = \Illuminate\Support\Facades\DB::table('meja')
             ->where('ruangan', 'Indoor')->orderBy('id_meja')->get()
-            ->map(function ($meja) use ($availability, $tanggal, $waktu, $jumlahTamu) {
-                $available = $availability->availableTableIds('Indoor', $tanggal, $waktu);
-                $meja->status = in_array($meja->id_meja, $available, false) ? 'KOSONG' : 'TERBOOKING';
+            ->map(function ($meja) use ($availableIndoor) {
+                $meja->status = in_array($meja->id_meja, $availableIndoor, false) ? 'KOSONG' : 'TERBOOKING';
                 return $meja;
             });
 
         $mejaOutdoor = \Illuminate\Support\Facades\DB::table('meja')
             ->where('ruangan', 'Outdoor')->orderBy('id_meja')->get()
-            ->map(function ($meja) use ($availability, $tanggal, $waktu, $jumlahTamu) {
-                $available = $availability->availableTableIds('Outdoor', $tanggal, $waktu);
-                $meja->status = in_array($meja->id_meja, $available, false) ? 'KOSONG' : 'TERBOOKING';
+            ->map(function ($meja) use ($availableOutdoor) {
+                $meja->status = in_array($meja->id_meja, $availableOutdoor, false) ? 'KOSONG' : 'TERBOOKING';
                 return $meja;
             });
 
