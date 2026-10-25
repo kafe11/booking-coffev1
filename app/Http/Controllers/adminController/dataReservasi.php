@@ -203,8 +203,7 @@ class dataReservasi extends Controller
             'daftar_meja' => $daftarMeja,
             'transaksi' => $transaksi,   // <-- tambahkan ini
             'pesanan' => $pesanan,
-            'bukti_pembayaran' => $reservasi->bukti_pembayaran,
-            'kode_meja' => $reservasi->kode_meja
+            'bukti_pembayaran' => $reservasi->bukti_pembayaran
         ]);
     }
 
