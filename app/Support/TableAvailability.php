@@ -27,6 +27,12 @@ class TableAvailability
     public function selectTableIds(string $room, string $date, string $time, int $guests, bool $lock = false): array
     {
         $required = max(1, (int) ceil($guests / self::GUESTS_PER_TABLE));
+        $available = $this->availableTableIds($room, $date, $time, $lock);
+        return count($available) >= $required ? array_slice($available, 0, $required) : [];
+    }
+
+    public function availableTableIds(string $room, string $date, string $time, bool $lock = false): array
+    {
         $start = Carbon::parse($date . ' ' . $time);
         $end = $start->copy()->addHours(self::RESERVATION_HOURS);
 
@@ -96,8 +102,6 @@ class TableAvailability
         }
 
         $blocked = array_unique($blocked);
-        $available = array_values(array_diff($ids, $blocked));
-
-        return count($available) >= $required ? array_slice($available, 0, $required) : [];
+        return array_values(array_diff($ids, $blocked));
     }
 }
