@@ -185,24 +185,19 @@ class PesananController extends Controller
 
         // 2. Ambil data reservasi pendukung (meja/ruangan) berdasarkan id_reservasi yang ada di transaksi
         $reservasi = DB::table('reservasi')->where('id_reservasi', $transaksi->id_reservasi)->first();
-        $reservasi_meja = DB::table('reservasi_meja')->where('id_reservasi', $transaksi->id_reservasi)->first();
-
+        $daftarMeja = collect();
         $meja = null;
         $ruangan = null;
 
         if ($reservasi) {
-            
-            $foreignKeyMeja = $reservasi_meja->id_meja ?? null; 
+            $daftarMeja = DB::table('reservasi_meja')
+                ->join('meja', 'reservasi_meja.id_meja', '=', 'meja.id_meja')
+                ->where('reservasi_meja.id_reservasi', $transaksi->id_reservasi)
+                ->orderBy('meja.kode_meja')
+                ->get(['meja.kode_meja', 'meja.ruangan']);
 
-            if ($foreignKeyMeja) {
-                $m = DB::table('meja')->where('id_meja', $foreignKeyMeja)->first();
-                $meja = $m->kode_meja;
-                $ruangan = $m->ruangan;
-                // Ambil data ruangan jika meja terhubung dengan ruangan
-                // if ($meja && isset($meja->id_ruangan)) {
-                //     $ruangan = DB::table('ruangan')->where('id_ruangan', $meja->id_ruangan)->first();
-                // }
-            }
+            $meja = $daftarMeja->pluck('kode_meja')->implode(', ');
+            $ruangan = $daftarMeja->pluck('ruangan')->unique()->implode(', ');
         }
 
         // 3. Ambil data menu yang dibeli dari tabel detail_pesanan (bukan session keranjang)

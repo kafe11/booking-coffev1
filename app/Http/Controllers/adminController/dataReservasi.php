@@ -20,13 +20,9 @@ class dataReservasi extends Controller
 
         $reservasi = Reservasi::with(['pelanggan', 'meja'])
             ->join('transaksi', 'transaksi.id_reservasi', '=', 'reservasi.id_reservasi')
-            ->join('reservasi_meja', 'reservasi_meja.id_reservasi', '=', 'reservasi.id_reservasi')
-            ->join('meja', 'meja.id_meja', '=', 'reservasi_meja.id_meja')
             ->select(
                 'reservasi.*',
                 'transaksi.status',
-                'reservasi_meja.id_meja',
-                'meja.kode_meja',
                 'transaksi.id_transaksi',
             )
             // ->when($search, function ($query, $search) {
@@ -127,20 +123,23 @@ class dataReservasi extends Controller
          */
         $reservasi = DB::table('reservasi')
             ->leftJoin('pelanggan', 'reservasi.id_pelanggan', '=', 'pelanggan.id_pelanggan')
-            ->leftJoin('reservasi_meja', 'reservasi_meja.id_reservasi', '=', 'reservasi.id_reservasi')
-            ->leftJoin('meja', 'reservasi_meja.id_meja', '=', 'meja.id_meja')
             ->where('reservasi.id_reservasi', $id)
             ->select(
+                'reservasi.id_reservasi',
                 'reservasi.id_pelanggan',
-                'reservasi_meja.id_meja',
-                'meja.id_meja',
-                'meja.kode_meja',
                 'pelanggan.nama_pelanggan',
                 'reservasi.waktu',
                 'reservasi.jumlah_tamu',
                 'reservasi.bukti_pembayaran'
             )
             ->first();
+
+        $daftarMeja = DB::table('reservasi_meja')
+            ->join('meja', 'reservasi_meja.id_meja', '=', 'meja.id_meja')
+            ->where('reservasi_meja.id_reservasi', $id)
+            ->orderBy('meja.kode_meja')
+            ->pluck('meja.kode_meja')
+            ->values();
 
         // Jika ID tidak ada (sudah dihapus)
         if (!$reservasi) {
@@ -200,6 +199,8 @@ class dataReservasi extends Controller
             'nama_pelanggan' => $reservasi->nama_pelanggan,
             'waktu' => $reservasi->waktu,
             'jumlah_tamu' => $reservasi->jumlah_tamu,
+            'kode_meja' => $daftarMeja->implode(', '),
+            'daftar_meja' => $daftarMeja,
             'transaksi' => $transaksi,   // <-- tambahkan ini
             'pesanan' => $pesanan,
             'bukti_pembayaran' => $reservasi->bukti_pembayaran,
