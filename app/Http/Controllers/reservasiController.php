@@ -100,7 +100,7 @@ class reservasiController extends Controller
             'nama' => 'required',
             'no_hp' => 'required',
             'waktu' => 'required',
-            'jumlah_tamu' => 'required|numeric',
+            'jumlah_tamu' => 'required|integer|min:1',
             // 'jumlah_meja' => 'required|numeric',
             'tanggal' => 'required',
 
