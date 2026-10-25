@@ -279,8 +279,12 @@ class PaymentController extends Controller
 
             report($e);
 
+            if ($e instanceof \\RuntimeException) {
+                return redirect()->route('reservasi')->with('gagal', $e->getMessage());
+            }
+
             return response()->json([
-                'error' => $e->getMessage(),
+                'error' => 'Checkout gagal diproses. Silakan coba kembali.',
             ], 500);
         }
     }
