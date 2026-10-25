@@ -170,7 +170,22 @@ class PaymentController extends Controller
             $urlGagal = url(route('admin.transaksiLangsung'));;
         }
 
+        DB::beginTransaction();
+
         try {
+            // Lock and revalidate table rows before creating the invoice. Locks
+            // remain held until the reservation and pivot rows are committed.
+            if (!$id_pengelola) {
+                $guestCount = (int) ($dataReservasi['jumlahTamu'] ?? $dataReservasi['jumlah_tamu'] ?? 1);
+                $mejaDipilih = app(\App\Support\TableAvailability::class)
+                    ->selectTableIds((string) $ruangan, (string) $dataReservasi['tanggal'], (string) $dataReservasi['waktu'], $guestCount, true);
+                if (empty($mejaDipilih)) {
+                    DB::rollBack();
+                    return redirect()->route('reservasi')
+                        ->with('gagal', 'Meja baru saja dipesan pelanggan lain. Silakan pilih waktu atau area lain.');
+                }
+            }
+
             // KIRIM KE XENDIT UNTUK BUAT INVOICE
             $apiInstance = new InvoiceApi();
             $createInvoiceRequest = new CreateInvoiceRequest([
@@ -195,19 +210,6 @@ class PaymentController extends Controller
             // primary key id_reservasi (bukan primary key default `id`).
             // XENDIT_PENDING menjaga kompatibilitas dengan database lama yang
             // masih memiliki bukti_pembayaran NOT NULL.
-            DB::beginTransaction();
-
-            // Serialize checkout attempts for the chosen room and recalculate
-            // allocation while table rows are locked, avoiding double-booking.
-            if (!$id_pengelola) {
-                $guestCount = (int) ($dataReservasi['jumlahTamu'] ?? $dataReservasi['jumlah_tamu'] ?? 1);
-                $mejaDipilih = app(\App\Support\TableAvailability::class)
-                    ->selectTableIds((string) $ruangan, (string) $dataReservasi['tanggal'], (string) $dataReservasi['waktu'], $guestCount, true);
-                if (empty($mejaDipilih)) {
-                    throw new \RuntimeException('Meja baru saja dipesan pelanggan lain. Silakan ulangi dengan waktu atau area lain.');
-                }
-            }
-
             $reservasiData = [
                 'id_pelanggan'     => $id_pelanggan,
                 'tanggal'          => $dataReservasi['tanggal'],
