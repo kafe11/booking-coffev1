@@ -271,7 +271,7 @@ class PaymentController extends Controller
         // jadi kalau pengelola nambah kategori baru di DB, tab-nya otomatis muncul.
         $kategoriList = $menus->pluck('kategori')->unique()->values();
         // dd($keranjang);
-        return view('admin.transaksiLangsung', [
+        return view('Admin.transaksiLangsung', [
             'id_transaksi' => $id,
             'menus'        => $menus,
             'kategoriList' => $kategoriList,
