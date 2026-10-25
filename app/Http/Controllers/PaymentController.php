@@ -199,10 +199,48 @@ class PaymentController extends Controller
 
             $id_reservasi = $reservasi->getKey();
 
-            DB::table('reservasi_meja')->insert([
-                'id_reservasi'     => $id_reservasi,
-                'id_meja'          => $mejaDipilih,
-            ]);
+            // Session mejaDipilih menyimpan daftar ID meja; dukung juga session lama yang berisi satu ID.
+            $daftarMejaDipilih = is_array($mejaDipilih) ? $mejaDipilih : [$mejaDipilih];
+            $daftarMejaDipilih = array_values(array_unique(array_filter($daftarMejaDipilih, fn ($id) => $id !== null && $id !== '')));
+
+            if (empty($daftarMejaDipilih)) {
+                throw new \\RuntimeException('Meja reservasi tidak ditemukan. Silakan pilih area dan waktu kembali.');
+            }
+
+            // Periksa ulang sebelum mengikat meja ke reservasi, menggunakan status transaksi yang sudah ada.
+            $bentrok = DB::table('reservasi_meja')
+                ->join('reservasi', 'reservasi_meja.id_reservasi', '=', 'reservasi.id_reservasi')
+                ->leftJoin('transaksi', 'reservasi.id_reservasi', '=', 'transaksi.id_reservasi')
+                ->whereIn('reservasi_meja.id_meja', $daftarMejaDipilih)
+                ->whereBetween('reservasi.tanggal', [
+                    \\Illuminate\\Support\\Carbon::parse($dataReservasi['tanggal'] . ' ' . $dataReservasi['waktu'])->subDay()->toDateString(),
+                    $dataReservasi['tanggal'],
+                ])
+                ->where(function ($query) {
+                    $query->whereIn('transaksi.status', ['menunggu', 'tervalidasi', 'selesai'])
+                        ->orWhereNull('transaksi.status');
+                })
+                ->select('reservasi_meja.id_meja', 'reservasi.tanggal', 'reservasi.waktu')
+                ->get();
+
+            $mulaiBaru = \\Illuminate\\Support\\Carbon::parse($dataReservasi['tanggal'] . ' ' . $dataReservasi['waktu']);
+            $selesaiBaru = $mulaiBaru->copy()->addHours(2);
+            foreach ($bentrok as $reservasiLama) {
+                $mulaiLama = \\Illuminate\\Support\\Carbon::parse($reservasiLama->tanggal . ' ' . $reservasiLama->waktu);
+                $selesaiLama = $mulaiLama->copy()->addHours(2);
+
+                if (in_array($reservasiLama->id_meja, $daftarMejaDipilih) &&
+                    $mulaiLama->lt($selesaiBaru) && $selesaiLama->gt($mulaiBaru)) {
+                    throw new \\RuntimeException('Meja baru saja dipesan pelanggan lain. Silakan pilih waktu atau area lain.');
+                }
+            }
+
+            foreach ($daftarMejaDipilih as $idMeja) {
+                DB::table('reservasi_meja')->insert([
+                    'id_reservasi' => $id_reservasi,
+                    'id_meja' => $idMeja,
+                ]);
+            }
 
             DB::table('transaksi')->insert([
                 'id_transaksi'      => $externalId,
