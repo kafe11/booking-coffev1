@@ -109,6 +109,38 @@
                                 @endforeach
                             </div>
 
+                            @if (!empty($transaksi->reservasi_id) && !empty($transaksi->tanggal_reservasi))
+                                <div class="mt-4 rounded-xl border border-amber-100 bg-amber-50/60 p-3 dark:border-zinc-700 dark:bg-zinc-800/50">
+                                    <div class="flex flex-wrap items-center justify-between gap-2">
+                                        <div class="text-xs text-gray-600 dark:text-gray-300">
+                                            <span class="font-semibold">Tanggal reservasi:</span>
+                                            {{ \\Illuminate\\Support\\Carbon::parse($transaksi->tanggal_reservasi)->format('d M Y') }}
+                                            @if ($transaksi->waktu_reservasi)
+                                                · {{ substr((string) $transaksi->waktu_reservasi, 0, 5) }}
+                                            @endif
+                                        </div>
+                                        @if (strtolower((string) $transaksi->status_kehadiran) === 'hadir')
+                                            <span class="rounded-full bg-green-100 px-2.5 py-1 text-xs font-semibold text-green-700">Kehadiran dikonfirmasi</span>
+                                        @elseif (strtolower((string) $transaksi->status_kehadiran) === 'dibatalkan' || strtolower((string) $transaksi->status) === 'batal')
+                                            <span class="rounded-full bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-700">Reservasi dibatalkan</span>
+                                        @elseif ($transaksi->aksi_reservasi_tersedia)
+                                            <div class="flex flex-wrap gap-2">
+                                                <form method="POST" action="{{ route('pelanggan.reservasi.hadir', $transaksi->id_transaksi) }}" onsubmit="return confirm('Konfirmasi bahwa Anda akan hadir pada reservasi ini?')">
+                                                    @csrf
+                                                    <button type="submit" class="rounded-lg bg-green-600 px-3 py-2 text-xs font-semibold text-white hover:bg-green-700">Konfirmasi Kehadiran</button>
+                                                </form>
+                                                <form method="POST" action="{{ route('pelanggan.reservasi.batal', $transaksi->id_transaksi) }}" onsubmit="return confirm('Yakin ingin membatalkan reservasi ini?')">
+                                                    @csrf
+                                                    <button type="submit" class="rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white hover:bg-red-700">Batalkan Reservasi</button>
+                                                </form>
+                                            </div>
+                                        @else
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">Konfirmasi kehadiran dan pembatalan tersedia mulai 3 hari sebelum tanggal reservasi.</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endif
+
                             <!-- Footer Card Nota (Struktur Diperbaiki Agar Tombol Tidak Tertumpu) -->
                             <div
                                 class="border-t border-gray-100 dark:border-zinc-800 mt-3 pt-3 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 text-sm">
