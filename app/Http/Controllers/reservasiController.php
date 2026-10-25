@@ -251,11 +251,12 @@ class reservasiController extends Controller
         $paymentDeadlineKey = 'payment_deadline_at_' . $userId;
 
         $data = Session::get('dataReservasi');
-        $meja = Session::get('mejaDipilih');
+        $meja = Session::get('mejaDipilih', []);
+        $mejaIds = is_array($meja) ? $meja : [$meja];
 
-        // dd($meja);
-
-        $mejaData = DB::table('meja')->where('id_meja', $meja)->first();
+        // Detail pesanan lama hanya menampilkan satu meja; gunakan meja pertama
+        // untuk kompatibilitas tampilan sambil menyimpan seluruh meja di pivot.
+        $mejaData = DB::table('meja')->whereIn('id_meja', $mejaIds)->orderBy('id_meja')->first();
 
         // kepake
         $ruangan = Session::get('RuanganDipilih');
