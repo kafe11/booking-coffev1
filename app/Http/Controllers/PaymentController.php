@@ -13,6 +13,7 @@ use App\Models\pelangganModel;
 use App\Models\reservasi;
 use App\Support\TransactionId;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Carbon;
 // use App\Models\Order;
 use Xendit\Configuration;
 use Xendit\Invoice\InvoiceApi;
@@ -36,7 +37,8 @@ class PaymentController extends Controller
         $id_pelanggan = session('id_pelanggan');
         $ruangan = Session::get('RuanganDipilih');
         $mejaDipilih   = Session::get('mejaDipilih');
-        $menuReservasi = Session::get('menuReservasi');\n        $mejaDipilih = is_array($mejaDipilih) ? array_values(array_unique(array_map('intval', $mejaDipilih))) : (empty($mejaDipilih) ? [] : [(int) $mejaDipilih]);
+        $menuReservasi = Session::get('menuReservasi');
+        $mejaDipilih = is_array($mejaDipilih) ? array_values(array_unique(array_map('intval', $mejaDipilih))) : (empty($mejaDipilih) ? [] : [(int) $mejaDipilih]);
 
         // dd($id_pelanggan, $id_pengelola);
 
@@ -75,7 +77,7 @@ class PaymentController extends Controller
                     (string) ($dataReservasi['tanggal'] ?? ''),
                     (string) ($dataReservasi['waktu'] ?? '')
                 );
-            } catch (\\RuntimeException $e) {
+            } catch (\RuntimeException $e) {
                 return redirect()->route('reservasi')->with('gagal', $e->getMessage());
             }
         }
@@ -291,7 +293,7 @@ class PaymentController extends Controller
     private function assertTablesAvailable(array $idsMeja, string $ruangan, string $tanggal, string $waktu, bool $lock = false): void
     {
         if (empty($idsMeja) || !in_array($ruangan, ['Indoor', 'Outdoor'], true) || $tanggal === '' || $waktu === '') {
-            throw new \\RuntimeException('Data meja atau reservasi tidak lengkap. Silakan pilih area dan waktu kembali.');
+            throw new \RuntimeException('Data meja atau reservasi tidak lengkap. Silakan pilih area dan waktu kembali.');
         }
 
         $mejaQuery = DB::table('meja')
@@ -305,7 +307,7 @@ class PaymentController extends Controller
 
         $mejaDitemukan = $mejaQuery->pluck('id_meja')->map(fn ($id) => (int) $id)->all();
         if (count($mejaDitemukan) !== count(array_unique($idsMeja))) {
-            throw new \\RuntimeException('Meja pilihan tidak valid atau bukan berasal dari area yang dipilih. Silakan pilih ulang.');
+            throw new \RuntimeException('Meja pilihan tidak valid atau bukan berasal dari area yang dipilih. Silakan pilih ulang.');
         }
 
         $mulai = Carbon::parse($tanggal . ' ' . $waktu);
@@ -324,7 +326,7 @@ class PaymentController extends Controller
             $mulaiLama = Carbon::parse($tanggal . ' ' . $reservasiLama->waktu);
             $selesaiLama = $mulaiLama->copy()->addHours(2);
             if ($mulaiLama->lt($selesai) && $selesaiLama->gt($mulai)) {
-                throw new \\RuntimeException('Maaf, meja yang tersedia baru saja berubah untuk waktu tersebut. Silakan pilih waktu lain.');
+                throw new \RuntimeException('Maaf, meja yang tersedia baru saja berubah untuk waktu tersebut. Silakan pilih waktu lain.');
             }
         }
     }
