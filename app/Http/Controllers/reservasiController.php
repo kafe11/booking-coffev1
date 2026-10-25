@@ -203,7 +203,7 @@ class reservasiController extends Controller
             });
 
         $mejaDipilih = session('mejaDipilih', []);
-        return view('User.tempat-duduk', compact('jumlahMeja', 'mejaDipilih', 'mejaIndoor', 'mejaOutdoor'));
+        return view('User.tempat-duduk', compact('mejaDipilih', 'mejaIndoor', 'mejaOutdoor'));
     }
 
     public function pilihTempatDuduk(Request $request)
