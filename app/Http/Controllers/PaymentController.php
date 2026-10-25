@@ -279,7 +279,7 @@ class PaymentController extends Controller
 
             report($e);
 
-            if ($e instanceof \\RuntimeException) {
+            if ($e instanceof \RuntimeException) {
                 return redirect()->route('reservasi')->with('gagal', $e->getMessage());
             }
 
