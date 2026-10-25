@@ -104,7 +104,7 @@
                                 </td>
 
                                 <td class="px-4 py-3 text-center">
-                                    {{ $r->kode_meja ?? '-' }}
+                                    {{ $r->meja->pluck('kode_meja')->implode(', ') ?: '-' }}
                                 </td>
 
                                 <td class="px-4 py-3 text-center">
