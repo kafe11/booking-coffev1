@@ -36,7 +36,7 @@ class PaymentController extends Controller
         $id_pelanggan = session('id_pelanggan');
         $ruangan = Session::get('RuanganDipilih');
         $mejaDipilih   = Session::get('mejaDipilih');
-        $menuReservasi = Session::get('menuReservasi');
+        $menuReservasi = Session::get('menuReservasi');\n        $mejaDipilih = is_array($mejaDipilih) ? array_values(array_unique(array_map('intval', $mejaDipilih))) : (empty($mejaDipilih) ? [] : [(int) $mejaDipilih]);
 
         // dd($id_pelanggan, $id_pengelola);
 
@@ -65,6 +65,19 @@ class PaymentController extends Controller
 
         if (!$id_pengelola && (!$id_pelanggan || empty($dataReservasi) || empty($ruangan) || empty($mejaDipilih))) {
             return redirect()->route('reservasi')->with('gagal', 'Data reservasi belum lengkap.');
+        }
+
+        if (!$id_pengelola) {
+            try {
+                $this->assertTablesAvailable(
+                    $mejaDipilih,
+                    (string) $ruangan,
+                    (string) ($dataReservasi['tanggal'] ?? ''),
+                    (string) ($dataReservasi['waktu'] ?? '')
+                );
+            } catch (\\RuntimeException $e) {
+                return redirect()->route('reservasi')->with('gagal', $e->getMessage());
+            }
         }
 
         if (empty(config('services.xendit.api_key'))) {
@@ -199,10 +212,16 @@ class PaymentController extends Controller
 
             $id_reservasi = $reservasi->getKey();
 
-            DB::table('reservasi_meja')->insert([
-                'id_reservasi'     => $id_reservasi,
-                'id_meja'          => $mejaDipilih,
-            ]);
+            $relasiMeja = array_map(function ($idMeja) use ($id_reservasi) {
+                return [
+                    'id_reservasi' => $id_reservasi,
+                    'id_meja' => $idMeja,
+                ];
+            }, $mejaDipilih);
+
+            if (!empty($relasiMeja)) {
+                DB::table('reservasi_meja')->insert($relasiMeja);
+            }
 
             DB::table('transaksi')->insert([
                 'id_transaksi'      => $externalId,
@@ -261,6 +280,52 @@ class PaymentController extends Controller
             return response()->json([
                 'error' => $e->getMessage(),
             ], 500);
+        }
+    }
+
+    /**
+     * Pastikan meja yang dipilih masih tersedia selama rentang reservasi dua jam.
+     * Meja tetap tertahan untuk transaksi menunggu, tervalidasi, dan selesai
+     * (selesai adalah status pembayaran, bukan tanda meja sudah bebas).
+     */
+    private function assertTablesAvailable(array $idsMeja, string $ruangan, string $tanggal, string $waktu, bool $lock = false): void
+    {
+        if (empty($idsMeja) || !in_array($ruangan, ['Indoor', 'Outdoor'], true) || $tanggal === '' || $waktu === '') {
+            throw new \\RuntimeException('Data meja atau reservasi tidak lengkap. Silakan pilih area dan waktu kembali.');
+        }
+
+        $mejaQuery = DB::table('meja')
+            ->whereIn('id_meja', $idsMeja)
+            ->where('ruangan', $ruangan)
+            ->orderBy('id_meja');
+
+        if ($lock) {
+            $mejaQuery->lockForUpdate();
+        }
+
+        $mejaDitemukan = $mejaQuery->pluck('id_meja')->map(fn ($id) => (int) $id)->all();
+        if (count($mejaDitemukan) !== count(array_unique($idsMeja))) {
+            throw new \\RuntimeException('Meja pilihan tidak valid atau bukan berasal dari area yang dipilih. Silakan pilih ulang.');
+        }
+
+        $mulai = Carbon::parse($tanggal . ' ' . $waktu);
+        $selesai = $mulai->copy()->addHours(2);
+
+        $reservasiAktif = DB::table('reservasi')
+            ->join('reservasi_meja', 'reservasi.id_reservasi', '=', 'reservasi_meja.id_reservasi')
+            ->join('transaksi', 'transaksi.id_reservasi', '=', 'reservasi.id_reservasi')
+            ->whereDate('reservasi.tanggal', $tanggal)
+            ->whereIn('reservasi_meja.id_meja', $idsMeja)
+            ->whereIn(DB::raw('LOWER(transaksi.status)'), ['menunggu', 'tervalidasi', 'selesai'])
+            ->select('reservasi_meja.id_meja', 'reservasi.waktu')
+            ->get();
+
+        foreach ($reservasiAktif as $reservasiLama) {
+            $mulaiLama = Carbon::parse($tanggal . ' ' . $reservasiLama->waktu);
+            $selesaiLama = $mulaiLama->copy()->addHours(2);
+            if ($mulaiLama->lt($selesai) && $selesaiLama->gt($mulai)) {
+                throw new \\RuntimeException('Maaf, meja yang tersedia baru saja berubah untuk waktu tersebut. Silakan pilih waktu lain.');
+            }
         }
     }
 
