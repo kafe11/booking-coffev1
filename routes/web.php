@@ -103,6 +103,8 @@ Route::get('/download-transaksi/{id}', [App\Http\Controllers\reservasiController
 
 
 Route::get('/riwayat-transaksi', [App\Http\Controllers\PesananController::class, 'riwayat'])->name('pesanan.riwayat');
+Route::post('/riwayat-transaksi/{id_transaksi}/konfirmasi-kehadiran', [PesananController::class, 'konfirmasiKehadiranPelanggan'])->name('pelanggan.reservasi.hadir');
+Route::post('/riwayat-transaksi/{id_transaksi}/batalkan-reservasi', [PesananController::class, 'batalkanReservasiPelanggan'])->name('pelanggan.reservasi.batal');
 Route::get('/riwayat-transaksi/download/{id_transaksi}', [PesananController::class, 'downloadNota'])->name('pesanan.download');
 
 Route::post('/transaksi/set-gagal', [App\Http\Controllers\reservasiController::class, 'setTransaksiGagal'])->name('transaksi.set-gagal');
