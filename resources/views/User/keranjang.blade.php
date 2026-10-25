@@ -32,9 +32,12 @@
                                                 Rp {{ number_format($item['harga']) }}
                                             </p>
                                         </div>
-                                        <div>
-                                            <p class="text-sm capitalize text-gray-500">{{ $item['catatan'] }}
-                                            </p>
+                                        <div class="text-right">
+                                            @foreach (($item['variasi'] ?? [['catatan' => ($item['catatan'] ?? '-'), 'qty' => ($item['qty'] ?? 1)]]) as $variasi)
+                                                <p class="text-sm text-gray-500">
+                                                    {{ ucfirst($variasi['catatan'] ?? '-') }} <span class="font-semibold">× {{ $variasi['qty'] ?? 1 }}</span>
+                                                </p>
+                                            @endforeach
                                         </div>
 
 
