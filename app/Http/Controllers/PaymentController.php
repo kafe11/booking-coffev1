@@ -81,27 +81,33 @@ class PaymentController extends Controller
 
         // Siapkan data untuk invoice
         foreach ($keranjang as $item) {
-            // Gabungkan nama menu dengan catatannya jika ada
+            $variasi = $item['variasi'] ?? [[
+                'catatan' => $item['catatan'] ?? '-',
+                'qty' => (int) ($item['qty'] ?? 1),
+            ]];
 
-            $namaMenu = $item['nama'];
-            if (!empty($item['catatan'])) {
-                $namaMenu .= ' (' . $item['catatan'] . ')';
+            foreach ($variasi as $varian) {
+                $qtyVarian = (int) ($varian['qty'] ?? 0);
+                if ($qtyVarian < 1) {
+                    continue;
+                }
+
+                $namaMenu = $item['nama'];
+                $catatanVarian = trim((string) ($varian['catatan'] ?? '-'));
+                if ($catatanVarian !== '' && $catatanVarian !== '-') {
+                    $namaMenu .= ' (' . $catatanVarian . ')';
+                }
+                $menuList[] = $namaMenu . ' x' . $qtyVarian;
+
+                $xenditItems[] = [
+                    'name' => (string) Str::limit($namaMenu, 50, '...'),
+                    'price' => (float) $item['harga'],
+                    'quantity' => $qtyVarian,
+                    'category' => (string) ($item['kategori'] ?? 'Makanan & Minuman'),
+                ];
+
+                $totalAmount += ($item['harga'] * $qtyVarian);
             }
-            $menuList[] = $namaMenu . ' x' . $item['qty'];
-
-
-            // Untuk deskripsi ringkas (tetap pertahankan sebagai cadangan data)
-
-            // PERBAIKAN UTAMA: Setiap item wajib dibungkus dengan Class `InvoiceItem` baru
-            $xenditItems[] = [
-                'name'     => (string) Str::limit($namaMenu, 50, '...'),
-                'price'    => (float) $item['harga'],
-                'quantity' => (int) $item['qty'],
-                'category' => (string) ($item['kategori'] ?? 'Makanan & Minuman')
-            ];
-
-            // Hitung total harga
-            $totalAmount += ($item['harga'] * $item['qty']);
         }
 
         $totalAmount = round($totalAmount / 2, 0);
@@ -212,12 +218,24 @@ class PaymentController extends Controller
             ]);
 
             foreach ($keranjang as $item) {
-                DetailPesanan::insert([
-                    'id_transaksi' => $externalId,
-                    'id_menu'      => $item['id'],
-                    'qty'          => $item['qty'],
-                    'catatan'      => $item['catatan'] ?? null,
-                ]);
+                $variasi = $item['variasi'] ?? [[
+                    'catatan' => $item['catatan'] ?? '-',
+                    'qty' => (int) ($item['qty'] ?? 1),
+                ]];
+
+                foreach ($variasi as $varian) {
+                    $qtyVarian = (int) ($varian['qty'] ?? 0);
+                    if ($qtyVarian < 1) {
+                        continue;
+                    }
+
+                    DetailPesanan::insert([
+                        'id_transaksi' => $externalId,
+                        'id_menu' => $item['id'],
+                        'qty' => $qtyVarian,
+                        'catatan' => $varian['catatan'] ?? null,
+                    ]);
+                }
             }
 
             DB::commit();
