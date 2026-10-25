@@ -173,76 +173,57 @@ class reservasiController extends Controller
     public function showTempatDuduk()
     {
         $data = session('dataReservasi');
-        $inputWaktuReservasi = $data['waktu'];
-        $inputTglReservasi = $data['tanggal'];
 
-        // data rata rata orang di coffe shop selama 2 jam
-        $perkiraanWaktuSelesai = Carbon::createFromFormat('H:i', $inputWaktuReservasi)->addHours(2)->format('H:i');
-
-        // dd($data);
-
-        if (!$data) {
+        if (empty($data)) {
             return redirect()->route('reservasi')
                 ->with('gagal', 'Silakan isi form reservasi terlebih dahulu.');
         }
 
-        $jumlahMeja = $data['jumlahMeja'];
+        $tanggalReservasi = $data['tanggal'];
+        $waktuReservasi = $data['waktu'];
+        if (strlen($waktuReservasi) === 5) {
+            $waktuReservasi .= ':00';
+        }
+
+        $mulaiReservasi = Carbon::parse($tanggalReservasi . ' ' . $waktuReservasi);
+        $selesaiReservasi = $mulaiReservasi->copy()->addHours(2);
+
+        // Status ini hanya untuk tampilan. Keputusan final ketersediaan selalu diperiksa lagi saat memilih/checkout.
+        $reservasiTerkait = DB::table('reservasi_meja')
+            ->join('reservasi', 'reservasi_meja.id_reservasi', '=', 'reservasi.id_reservasi')
+            ->leftJoin('transaksi', 'reservasi.id_reservasi', '=', 'transaksi.id_reservasi')
+            ->whereBetween('reservasi.tanggal', [
+                $mulaiReservasi->copy()->subDay()->toDateString(),
+                $mulaiReservasi->toDateString(),
+            ])
+            ->where(function ($query) {
+                $query->whereIn('transaksi.status', ['menunggu', 'tervalidasi', 'selesai'])
+                    ->orWhereNull('transaksi.status');
+            })
+            ->select('reservasi_meja.id_meja', 'reservasi.tanggal', 'reservasi.waktu')
+            ->get();
+
+        $mejaTerpakai = [];
+        foreach ($reservasiTerkait as $reservasiLama) {
+            $mulaiLama = Carbon::parse($reservasiLama->tanggal . ' ' . $reservasiLama->waktu);
+            $selesaiLama = $mulaiLama->copy()->addHours(2);
+
+            if ($mulaiLama->lt($selesaiReservasi) && $selesaiLama->gt($mulaiReservasi)) {
+                $mejaTerpakai[] = (int) $reservasiLama->id_meja;
+            }
+        }
+
+        $daftarMeja = Meja::orderBy('id_meja')->get()->map(function ($meja) use ($mejaTerpakai) {
+            $meja->status = in_array((int) $meja->id_meja, $mejaTerpakai, true)
+                ? 'TERBOOKING'
+                : 'KOSONG';
+            return $meja;
+        });
+
+        $mejaIndoor = $daftarMeja->where('ruangan', 'Indoor')->values();
+        $mejaOutdoor = $daftarMeja->where('ruangan', 'Outdoor')->values();
+        $jumlahMeja = (int) ceil(((int) ($data['jumlahTamu'] ?? $data['jumlah_tamu'] ?? 1)) / 4);
         $mejaDipilih = session('mejaDipilih', []);
-
-        $mejaIndoor = Meja::where('meja.ruangan', 'Indoor')
-            ->leftJoin('reservasi_meja', 'meja.id_meja', '=', 'reservasi_meja.id_meja')
-            ->leftJoin('reservasi', function ($join) use ($inputTglReservasi) {
-                $join->on('reservasi_meja.id_reservasi', '=', 'reservasi.id_reservasi')
-                    ->where('reservasi.tanggal', '=', $inputTglReservasi);
-            })
-            ->leftJoin('transaksi', 'transaksi.id_reservasi', '=', 'reservasi.id_reservasi')
-            ->select(
-                DB::raw('DISTINCT ON (meja.id_meja) meja.id_meja'), // Kunci agar meja tidak dobel
-                'meja.*',
-                'reservasi.tanggal',
-                'reservasi.waktu',
-                'transaksi.status as status_transaksi',
-                DB::raw("
-            CASE 
-                WHEN transaksi.status = 'selesai' THEN 'KOSONG'
-                WHEN reservasi.id_reservasi IS NULL THEN 'KOSONG' 
-                ELSE 'TERBOOKING' 
-            END AS status
-        ")
-            )
-            ->orderBy('meja.id_meja') // Wajib ada orderBy jika pakai DISTINCT ON
-            ->orderBy('status', 'DESC') // Biar 'TERBOOKING' muncul duluan dibanding 'KOSONG' jika ada dua baris
-            ->get();
-
-        $mejaOutdoor = Meja::where('meja.ruangan', 'Outdoor')
-            ->leftJoin('reservasi_meja', 'meja.id_meja', '=', 'reservasi_meja.id_meja')
-            ->leftJoin('reservasi', function ($join) use ($inputTglReservasi) {
-                $join->on('reservasi_meja.id_reservasi', '=', 'reservasi.id_reservasi')
-                    ->where('reservasi.tanggal', '=', $inputTglReservasi);
-            })
-            ->leftJoin('transaksi', 'transaksi.id_reservasi', '=', 'reservasi.id_reservasi')
-            ->select(
-                DB::raw('DISTINCT ON (meja.id_meja) meja.id_meja'), // Kunci agar meja tidak dobel
-                'meja.*',
-                'reservasi.tanggal',
-                'reservasi.waktu',
-                'transaksi.status as status_transaksi',
-                DB::raw("
-            CASE 
-                WHEN transaksi.status = 'selesai' THEN 'KOSONG'
-                WHEN reservasi.id_reservasi IS NULL THEN 'KOSONG' 
-                ELSE 'TERBOOKING' 
-            END AS status
-        ")
-            )
-            ->orderBy('meja.id_meja') // Wajib ada orderBy jika pakai DISTINCT ON
-            ->orderBy('status', 'DESC') // Biar 'TERBOOKING' muncul duluan dibanding 'KOSONG' jika ada dua baris
-            ->get();
-
-        // $mejaIndoor = Meja::where('ruangan', 'Indoor')->get();
-        // $mejaOutdoor = Meja::where('ruangan', 'Outdoor')->get();
-
-        // dd($mejaIndoor, $mejaOutdoor);
 
         return view('User.tempat-duduk', compact('jumlahMeja', 'mejaDipilih', 'mejaIndoor', 'mejaOutdoor'));
     }
