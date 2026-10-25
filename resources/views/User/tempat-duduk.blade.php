@@ -67,7 +67,7 @@
                         <div class="grid grid-cols-1 gap-8 items-center">
                             <div class="flex flex-col h-full lg:order-first">
                                 <h2 class="text-2xl font-semibold mb-2 text-primary-dark dark:text-secondary">Indoor</h2>
-                                <p class="font-medium mb-4 text-gray-600 dark:text-gray-300">Pilih Ruangan</p>
+                                <p class="font-medium mb-4 text-gray-600 dark:text-gray-300">Pilih area; meja akan ditentukan otomatis</p>
                             </div>
                         </div>
                         <div class="grid grid-cols-1 gap-8 items-center">
@@ -104,7 +104,7 @@
                         <div class="grid grid-cols-1 gap-6 items-center">
                             <div class="flex flex-col h-full">
                                 <h2 class="text-2xl font-semibold mb-2 text-primary-dark dark:text-secondary">Indoor</h2>
-                                <p class="font-medium mb-4 text-gray-600 dark:text-gray-300">Pilih Ruangan</p>
+                                <p class="font-medium mb-4 text-gray-600 dark:text-gray-300">Pilih area; meja akan ditentukan otomatis</p>
                             </div>
                         </div>
 
@@ -147,7 +147,7 @@
                         <div class="grid grid-cols-1 gap-6 items-center">
                             <div class="flex flex-col h-full">
                                 <h2 class="text-2xl font-semibold mb-2 text-primary-dark dark:text-secondary">Outdoor</h2>
-                                <p class="font-medium mb-4 text-gray-600 dark:text-gray-300">Pilih Ruangan</p>
+                                <p class="font-medium mb-4 text-gray-600 dark:text-gray-300">Pilih area; meja akan ditentukan otomatis</p>
                             </div>
                         </div>
 
@@ -191,7 +191,7 @@
                         <div class="grid grid-cols-1 gap-8 items-center">
                             <div class="flex flex-col h-full lg:order-first">
                                 <h2 class="text-2xl font-semibold mb-2 text-primary-dark dark:text-secondary">Indoor</h2>
-                                <p class="font-medium mb-4 text-gray-600 dark:text-gray-300">Pilih Ruangan</p>
+                                <p class="font-medium mb-4 text-gray-600 dark:text-gray-300">Pilih area; meja akan ditentukan otomatis</p>
                             </div>
                         </div>
                         <div class="grid grid-cols-1 gap-8 items-center">
@@ -229,7 +229,7 @@
                         <div class="grid grid-cols-1 gap-8 items-center">
                             <div class="flex flex-col h-full lg:order-first">
                                 <h2 class="text-2xl font-semibold mb-2 text-primary-dark dark:text-secondary">Outdoor</h2>
-                                <p class="font-medium mb-4 text-gray-600 dark:text-gray-300">Pilih Ruangan</p>
+                                <p class="font-medium mb-4 text-gray-600 dark:text-gray-300">Pilih area; meja akan ditentukan otomatis</p>
                             </div>
                         </div>
 
