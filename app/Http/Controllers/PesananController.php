@@ -39,7 +39,7 @@ class PesananController extends Controller
         $tanggalHariIni = now()->startOfDay();
         foreach ($pesananSukses as $transaksi) {
             $tanggalReservasi = $transaksi->tanggal_reservasi
-                ? \\Illuminate\\Support\\Carbon::parse($transaksi->tanggal_reservasi)->startOfDay()
+                ? \Illuminate\Support\Carbon::parse($transaksi->tanggal_reservasi)->startOfDay()
                 : null;
             $transaksi->aksi_reservasi_tersedia = $tanggalReservasi
                 && $tanggalReservasi->greaterThanOrEqualTo($tanggalHariIni)
@@ -124,7 +124,7 @@ class PesananController extends Controller
             return redirect()->route('pesanan.riwayat')->with('gagal', 'Reservasi tidak ditemukan.');
         }
 
-        $tanggalReservasi = \\Illuminate\\Support\\Carbon::parse($reservasi->tanggal)->startOfDay();
+        $tanggalReservasi = \Illuminate\Support\Carbon::parse($reservasi->tanggal)->startOfDay();
         $hariIni = now()->startOfDay();
 
         if ($tanggalReservasi->lt($hariIni) || $tanggalReservasi->gt($hariIni->copy()->addDays(3))) {
