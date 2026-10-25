@@ -108,13 +108,12 @@
                                 </td>
 
                                 <td class="px-4 py-3 text-center">
-                                    @if (($r->status_kehadiran ?? 'belum_hadir') === 'hadir')
+                                    @if (strtolower((string) ($r->status_kehadiran ?? '')) === 'hadir')
                                         <span class="px-2 py-1 rounded bg-green-100 text-green-700">Hadir</span>
+                                    @elseif (strtolower((string) ($r->status_kehadiran ?? '')) === 'dibatalkan' || strtolower((string) ($r->status ?? '')) === 'batal')
+                                        <span class="px-2 py-1 rounded bg-red-100 text-red-700">Dibatalkan</span>
                                     @else
-                                        <form method="POST" action="{{ route('reservasi.kehadiran', $r->id_reservasi) }}">
-                                            @csrf
-                                            <button type="submit" class="px-2 py-1 rounded bg-amber-500 hover:bg-amber-600 text-white">Konfirmasi hadir</button>
-                                        </form>
+                                        <span class="px-2 py-1 rounded bg-gray-100 text-gray-700">Belum dikonfirmasi</span>
                                     @endif
                                 </td>
 
