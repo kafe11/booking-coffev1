@@ -180,7 +180,7 @@ class reservasiController extends Controller
         }
 
         $jumlahTamu = (int) ($data['jumlahTamu'] ?? $data['jumlah_tamu'] ?? 1);
-        $jumlahMeja = max(1, (int) ceil($jumlahTamu / \App\Support\TableAvailability::GUESTS_PER_TABLE));
+        // Kapasitas tiap meja berbeda dan dihitung saat area dipilih; tidak gunakan konstanta tetap.
         $tanggal = $data['tanggal'];
         $waktu = $data['waktu'];
         $availability = app(\App\Support\TableAvailability::class);
@@ -203,7 +203,7 @@ class reservasiController extends Controller
             });
 
         $mejaDipilih = session('mejaDipilih', []);
-        return view('User.tempat-duduk', compact('jumlahMeja', 'mejaDipilih', 'mejaIndoor', 'mejaOutdoor'));
+        return view('User.tempat-duduk', compact('mejaDipilih', 'mejaIndoor', 'mejaOutdoor'));
     }
 
     public function pilihTempatDuduk(Request $request)
