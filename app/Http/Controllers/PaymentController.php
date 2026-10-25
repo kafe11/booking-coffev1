@@ -79,6 +79,21 @@ class PaymentController extends Controller
             }
         }
 
+        // Recheck availability before creating an invoice. The same check is
+        // repeated under row locks inside the reservation transaction below.
+        if (!$id_pengelola) {
+            $guestCount = (int) ($dataReservasi['jumlahTamu'] ?? $dataReservasi['jumlah_tamu'] ?? 1);
+            $availableIds = app(\App\Support\TableAvailability::class)
+                ->selectTableIds((string) $ruangan, (string) $dataReservasi['tanggal'], (string) $dataReservasi['waktu'], $guestCount);
+            if (empty($availableIds)) {
+                return redirect()->route('reservasi')
+                    ->with('gagal', 'Meja pada area tersebut tidak lagi mencukupi. Silakan pilih waktu atau area lain.');
+            }
+            $mejaDipilih = $availableIds;
+        } else {
+            $mejaDipilih = is_array($mejaDipilih) ? $mejaDipilih : [$mejaDipilih];
+        }
+
         // Siapkan data untuk invoice
         foreach ($keranjang as $item) {
             $variasi = $item['variasi'] ?? [[
@@ -182,6 +197,17 @@ class PaymentController extends Controller
             // masih memiliki bukti_pembayaran NOT NULL.
             DB::beginTransaction();
 
+            // Serialize checkout attempts for the chosen room and recalculate
+            // allocation while table rows are locked, avoiding double-booking.
+            if (!$id_pengelola) {
+                $guestCount = (int) ($dataReservasi['jumlahTamu'] ?? $dataReservasi['jumlah_tamu'] ?? 1);
+                $mejaDipilih = app(\App\Support\TableAvailability::class)
+                    ->selectTableIds((string) $ruangan, (string) $dataReservasi['tanggal'], (string) $dataReservasi['waktu'], $guestCount, true);
+                if (empty($mejaDipilih)) {
+                    throw new \RuntimeException('Meja baru saja dipesan pelanggan lain. Silakan ulangi dengan waktu atau area lain.');
+                }
+            }
+
             $reservasiData = [
                 'id_pelanggan'     => $id_pelanggan,
                 'tanggal'          => $dataReservasi['tanggal'],
@@ -199,10 +225,14 @@ class PaymentController extends Controller
 
             $id_reservasi = $reservasi->getKey();
 
-            DB::table('reservasi_meja')->insert([
-                'id_reservasi'     => $id_reservasi,
-                'id_meja'          => $mejaDipilih,
-            ]);
+            $pivotRows = [];
+            foreach ((array) $mejaDipilih as $tableId) {
+                $pivotRows[] = [
+                    'id_reservasi' => $id_reservasi,
+                    'id_meja' => $tableId,
+                ];
+            }
+            DB::table('reservasi_meja')->insert($pivotRows);
 
             DB::table('transaksi')->insert([
                 'id_transaksi'      => $externalId,
