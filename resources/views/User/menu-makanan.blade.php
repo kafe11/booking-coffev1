@@ -42,7 +42,7 @@
     
                     <!-- Gambar -->
                     <div class="aspect-square overflow-hidden">
-                        <img src="{{ asset('storage/' . $menu->gambar) }}" alt="{{ $menu->nama_menu }}"
+                        <img src="{{ ((\Illuminate\Support\Facades\Storage::disk((config('filesystems.default') === 'local' ? 'public' : config('filesystems.default')))->exists($menu->gambar)) ? \Illuminate\Support\Facades\Storage::disk((config('filesystems.default') === 'local' ? 'public' : config('filesystems.default')))->url($menu->gambar) : \Illuminate\Support\Facades\Storage::disk('public')->url($menu->gambar)) }}" alt="{{ $menu->nama_menu }}"
                             class="w-full h-full object-cover
                            {{ $menu->stok > 0 ? 'group-hover:scale-105 transition' : '' }}">
                     </div>
@@ -106,7 +106,7 @@
     
                     <!-- Gambar -->
                     <div class="aspect-square overflow-hidden">
-                        <img src="{{ asset('storage/' . $menu->gambar) }}" alt="{{ $menu->nama_menu }}"
+                        <img src="{{ ((\Illuminate\Support\Facades\Storage::disk((config('filesystems.default') === 'local' ? 'public' : config('filesystems.default')))->exists($menu->gambar)) ? \Illuminate\Support\Facades\Storage::disk((config('filesystems.default') === 'local' ? 'public' : config('filesystems.default')))->url($menu->gambar) : \Illuminate\Support\Facades\Storage::disk('public')->url($menu->gambar)) }}" alt="{{ $menu->nama_menu }}"
                             class="w-full h-full object-cover
                            {{ $menu->stok > 0 ? 'group-hover:scale-105 transition' : '' }}">
                     </div>
@@ -171,7 +171,7 @@
     
                     <!-- Gambar -->
                     <div class="aspect-square overflow-hidden">
-                        <img src="{{ asset('storage/' . $menu->gambar) }}" alt="{{ $menu->nama_menu }}"
+                        <img src="{{ ((\Illuminate\Support\Facades\Storage::disk((config('filesystems.default') === 'local' ? 'public' : config('filesystems.default')))->exists($menu->gambar)) ? \Illuminate\Support\Facades\Storage::disk((config('filesystems.default') === 'local' ? 'public' : config('filesystems.default')))->url($menu->gambar) : \Illuminate\Support\Facades\Storage::disk('public')->url($menu->gambar)) }}" alt="{{ $menu->nama_menu }}"
                             class="w-full h-full object-cover
                            {{ $menu->stok > 0 ? 'group-hover:scale-105 transition' : '' }}">
                     </div>
