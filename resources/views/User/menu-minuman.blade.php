@@ -22,7 +22,7 @@
 
                         <!-- Gambar -->
                         <div class="aspect-square overflow-hidden">
-                            <img src="{{ ((\Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->exists($menu->gambar)) ? \Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->url($menu->gambar) : \Illuminate\Support\Facades\Storage::disk('public')->url($menu->gambar)) }}" alt="{{ $menu->nama_menu }}"
+                            <img src="{{ ((\Illuminate\Support\Facades\Storage::disk((config('filesystems.default') === 'local' ? 'public' : config('filesystems.default')))->exists($menu->gambar)) ? \Illuminate\Support\Facades\Storage::disk((config('filesystems.default') === 'local' ? 'public' : config('filesystems.default')))->url($menu->gambar) : \Illuminate\Support\Facades\Storage::disk('public')->url($menu->gambar)) }}" alt="{{ $menu->nama_menu }}"
                                 class="w-full h-full object-cover group-hover:scale-105 transition">
                         </div>
 
@@ -58,7 +58,7 @@
 
                         <!-- Gambar -->
                         <div class="aspect-square overflow-hidden">
-                            <img src="{{ ((\Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->exists($menu->gambar)) ? \Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->url($menu->gambar) : \Illuminate\Support\Facades\Storage::disk('public')->url($menu->gambar)) }}" alt="{{ $menu->nama_menu }}"
+                            <img src="{{ ((\Illuminate\Support\Facades\Storage::disk((config('filesystems.default') === 'local' ? 'public' : config('filesystems.default')))->exists($menu->gambar)) ? \Illuminate\Support\Facades\Storage::disk((config('filesystems.default') === 'local' ? 'public' : config('filesystems.default')))->url($menu->gambar) : \Illuminate\Support\Facades\Storage::disk('public')->url($menu->gambar)) }}" alt="{{ $menu->nama_menu }}"
                                 class="w-full h-full object-cover group-hover:scale-105 transition">
                         </div>
 
@@ -95,7 +95,7 @@
                         <!-- Gambar -->
                         <div class="aspect-square overflow-hidden bg-gray-100">
                             @if ($menu->gambar)
-                                <img src="{{ ((\Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->exists($menu->gambar)) ? \Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->url($menu->gambar) : \Illuminate\Support\Facades\Storage::disk('public')->url($menu->gambar)) }}" alt="{{ $menu->nama_menu }}"
+                                <img src="{{ ((\Illuminate\Support\Facades\Storage::disk((config('filesystems.default') === 'local' ? 'public' : config('filesystems.default')))->exists($menu->gambar)) ? \Illuminate\Support\Facades\Storage::disk((config('filesystems.default') === 'local' ? 'public' : config('filesystems.default')))->url($menu->gambar) : \Illuminate\Support\Facades\Storage::disk('public')->url($menu->gambar)) }}" alt="{{ $menu->nama_menu }}"
                                     class="w-full h-full object-cover group-hover:scale-105 transition">
                             @else
                                 <!-- Gambar pengganti jika data gambar di database kosong -->
