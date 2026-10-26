@@ -78,8 +78,8 @@ class dataMenuController extends Controller
         }
 
         // Hapus gambar dari storage
-        if ($menu->gambar && Storage::disk(config('filesystems.default'))->exists($menu->gambar)) {
-            Storage::disk(config('filesystems.default'))->delete($menu->gambar);
+        if ($menu->gambar && Storage::disk((config('filesystems.default') === 'local' ? 'public' : config('filesystems.default')))->exists($menu->gambar)) {
+            Storage::disk((config('filesystems.default') === 'local' ? 'public' : config('filesystems.default')))->delete($menu->gambar);
         }
 
         $menu->delete();
@@ -118,7 +118,7 @@ class dataMenuController extends Controller
             }
 
             $namaFile = Str::random(10) . '.' . $request->gambar->extension();
-            $menu->gambar = $request->gambar->storeAs('menu', $namaFile, config('filesystems.default'));
+            $menu->gambar = $request->gambar->storeAs('menu', $namaFile, (config('filesystems.default') === 'local' ? 'public' : config('filesystems.default')));
         }
 
         
@@ -182,7 +182,7 @@ class dataMenuController extends Controller
 
         // Simpan gambar
         $namaFile = Str::random(10) . '.' . $request->gambar->extension();
-        $path = $request->gambar->storeAs('menu', $namaFile, config('filesystems.default'));
+        $path = $request->gambar->storeAs('menu', $namaFile, (config('filesystems.default') === 'local' ? 'public' : config('filesystems.default')));
 
         // dd($request->all());
 
