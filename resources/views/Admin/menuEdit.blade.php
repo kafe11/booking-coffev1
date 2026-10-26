@@ -28,7 +28,7 @@
             {{-- GAMBAR SAAT INI --}}
             @if ($menu->gambar)
                 <div class="flex justify-center mb-6">
-                    <img src="{{ ((\Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->exists($menu->gambar)) ? \Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->url($menu->gambar) : \Illuminate\Support\Facades\Storage::disk('public')->url($menu->gambar)) }}"
+                    <img src="{{ ((\Illuminate\Support\Facades\Storage::disk((config('filesystems.default') === 'local' ? 'public' : config('filesystems.default')))->exists($menu->gambar)) ? \Illuminate\Support\Facades\Storage::disk((config('filesystems.default') === 'local' ? 'public' : config('filesystems.default')))->url($menu->gambar) : \Illuminate\Support\Facades\Storage::disk('public')->url($menu->gambar)) }}"
                          class="w-48 h-48 object-cover rounded-xl border shadow">
                 </div>
             @endif
