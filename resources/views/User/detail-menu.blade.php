@@ -32,7 +32,7 @@
 
                 <!-- Gambar Menu -->
                 <div class="w-full md:w-1/2">
-                    <img src="{{ ((\Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->exists($menu->gambar)) ? \Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->url($menu->gambar) : \Illuminate\Support\Facades\Storage::disk('public')->url($menu->gambar)) }}" alt="{{ $menu->nama_menu }}"
+                    <img src="{{ ((\Illuminate\Support\Facades\Storage::disk((config('filesystems.default') === 'local' ? 'public' : config('filesystems.default')))->exists($menu->gambar)) ? \Illuminate\Support\Facades\Storage::disk((config('filesystems.default') === 'local' ? 'public' : config('filesystems.default')))->url($menu->gambar) : \Illuminate\Support\Facades\Storage::disk('public')->url($menu->gambar)) }}" alt="{{ $menu->nama_menu }}"
                         class="w-full h-64 md:h-full object-cover rounded-lg">
                 </div>
 
