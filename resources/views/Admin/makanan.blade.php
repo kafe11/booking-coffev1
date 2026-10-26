@@ -66,7 +66,7 @@
     
                             <td class="px-4 py-3">
                                 <div class="flex justify-center">
-                                    <img src="{{ asset('storage/' . $menu->gambar) }}" alt="{{ $menu->nama_menu }}"
+                                    <img src="{{ ((\Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->exists($menu->gambar)) ? \Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->url($menu->gambar) : \Illuminate\Support\Facades\Storage::disk('public')->url($menu->gambar)) }}" alt="{{ $menu->nama_menu }}"
                                         class="h-14 w-14 object-cover rounded-lg border">
                                 </div>
                             </td>
