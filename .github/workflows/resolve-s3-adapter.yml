@@ -1,0 +1,44 @@
+name: Resolve S3 filesystem adapter lockfile
+
+on:
+  push:
+    branches:
+      - fix/laravel-cloud-object-storage
+    paths:
+      - composer.json
+      - .github/workflows/resolve-s3-adapter.yml
+
+permissions:
+  contents: write
+
+jobs:
+  update-lockfile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+        with:
+          ref: fix/laravel-cloud-object-storage
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up PHP and Composer
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+          coverage: none
+
+      - name: Resolve dependency and update lockfile
+        run: composer update league/flysystem-aws-s3-v3 --with-all-dependencies --no-interaction --prefer-dist
+
+      - name: Commit updated lockfile
+        run: |
+          if git diff --quiet -- composer.lock; then
+            echo "composer.lock is already up to date."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add composer.lock
+          git commit -m "Update Composer lockfile for S3 filesystem adapter"
+          git push origin HEAD:fix/laravel-cloud-object-storage
