@@ -17,7 +17,7 @@
                 @foreach ($keranjang as $index => $item)
                     <div class="rounded-2xl bg-white p-5 shadow-md">
                         <div class="flex gap-4">
-                            <img src="{{ ((\Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->exists($item['gambar'])) ? \Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->url($item['gambar']) : \Illuminate\Support\Facades\Storage::disk('public')->url($item['gambar'])) }}" alt="{{ $item['nama'] }}"
+                            <img src="{{ ((\Illuminate\Support\Facades\Storage::disk((config('filesystems.default') === 'local' ? 'public' : config('filesystems.default')))->exists($item['gambar'])) ? \Illuminate\Support\Facades\Storage::disk((config('filesystems.default') === 'local' ? 'public' : config('filesystems.default')))->url($item['gambar']) : \Illuminate\Support\Facades\Storage::disk('public')->url($item['gambar'])) }}" alt="{{ $item['nama'] }}"
                                 class="h-24 w-24 rounded-xl object-cover">
 
                             <div class="flex flex-1 flex-col justify-between">
