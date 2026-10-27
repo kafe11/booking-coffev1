@@ -73,11 +73,11 @@
                     <p class="text-sm text-gray-500 dark:text-gray-400">Data reservasi per bulan</p>
                 </div>
                 <div class="text-right">
-                    <!-- <h3 class="text-md font-bold text-gray-900 dark:text-grey-800">Total Pendapatan</h3>
+                   {{--  <h3 class="text-md font-bold text-gray-900 dark:text-grey-800">Total Pendapatan</h3>
                     <p class="text-2xl font-bold text-gray-900 dark:text-gray-400 tracking-tight">
                         Rp. {{ number_format($totalRevenue, 0, ',', '.') }}
-                    </p> -->
-                    {{-- <div class="flex items-center justify-end gap-1 text-sm text-primary font-medium">
+                    </p> 
+                    <div class="flex items-center justify-end gap-1 text-sm text-primary font-medium">
                         <span class="material-symbols-outlined text-[16px]">arrow_upward</span>
                         15% vs yesterday
                     </div> --}}
