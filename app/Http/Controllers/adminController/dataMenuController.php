@@ -70,13 +70,6 @@ class dataMenuController extends Controller
     {
         $menu = menuModel::findOrFail($id);
 
-        $duplicate = menuModel::whereRaw('LOWER(nama_menu) = LOWER(?)', [trim($request->nama_menu)])
-            ->where('id_menu', '!=', $id)
-            ->exists();
-        if ($duplicate) {
-            return back()->withInput()->with('gagal', 'Nama menu sudah digunakan. Gunakan nama menu lain.');
-        }
-
         // Hapus gambar dari storage
         if ($menu->gambar && Storage::disk((config('filesystems.default') === 'local' ? 'public' : config('filesystems.default')))->exists($menu->gambar)) {
             Storage::disk((config('filesystems.default') === 'local' ? 'public' : config('filesystems.default')))->delete($menu->gambar);
