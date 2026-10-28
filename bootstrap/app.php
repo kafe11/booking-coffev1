@@ -13,7 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withSchedule(function (Schedule $schedule): void {
-        $schedule->command('reservasi:auto-cancel-unconfirmed')->hourly();
+        $schedule->command('reservasi:auto-cancel-unconfirmed')->everyMinute();
     })
     ->withMiddleware(function (Middleware $middleware): void {
         // DI SINI TEMPAT YANG BENAR
