@@ -1,0 +1,61 @@
+name: Upgrade Laravel Framework
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  upgrade:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          tools: composer:v2
+          extensions: curl, dom, mbstring, pdo_sqlite, sqlite3, xml, zip
+
+      - name: Validate Composer configuration
+        run: composer validate --no-check-publish
+
+      - name: Update Laravel framework constraint
+        run: composer require "laravel/framework:^12.56" --no-interaction --no-update
+
+      - name: Resolve updated dependencies compatible with PHP 8.3
+        run: composer update laravel/framework league/flysystem-aws-s3-v3 aws/aws-sdk-php symfony/filesystem --with-all-dependencies --no-interaction --prefer-dist
+
+      - name: Verify installed Laravel version
+        run: php artisan --version
+
+      - name: Create pull request with dependency updates
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: chore/upgrade-laravel-12-56
+          base: main
+          delete-branch: true
+          title: "chore: upgrade Laravel framework to ^12.56"
+          commit-message: "chore: upgrade Laravel framework to ^12.56"
+          body: |
+            ## Summary
+            - Update the Laravel framework constraint to `^12.56`.
+            - Refresh related Flysystem/AWS SDK/Symfony filesystem dependencies together to resolve a PHP 8.3 dependency conflict.
+            - Regenerate `composer.lock`.
+
+            ## Validation
+            - Composer configuration validation
+            - Dependency resolution under PHP 8.3
+            - Laravel Artisan version check
+
+            Please review the dependency changes and run the application's full test suite before merging.
+          add-paths: |
+            composer.json
+            composer.lock
