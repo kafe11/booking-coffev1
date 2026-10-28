@@ -14,6 +14,7 @@
         .item-table td { padding: 10px 8px; border-bottom: 1px solid #eee; }
         .total-style { text-align: right; font-size: 16px; margin-top: 15px; font-weight: bold; color: #8B5A2B; }
         .badge-reservasi { background: #fdf6e2; border: 1px solid #f5dba6; padding: 10px; border-radius: 5px; margin-bottom: 20px; font-size: 13px; }
+        .peringatan { background: #fff4e5; border: 1px solid #e6b566; padding: 10px; margin-top: 20px; font-size: 11px; }
     </style>
 </head>
 <body>
@@ -48,12 +49,18 @@
     @if($reservasi)
     <div class="badge-reservasi">
         <strong>Informasi Tempat & Reservasi:</strong><br>
-        • ID RESERVASI: #{{ $reservasi->id_reservasi }}<br>
         • Ruangan: {{ $ruangan == 'Indoor' ? 'indoor':$ruangan }}<br>
         • Nomor Meja: {{ $meja ?: '-' }}<br>
         • Tanggal Reservasi: {{ date('d M Y', strtotime($reservasi->tanggal)) }}
     </div>
     @endif
+
+    <div class="peringatan">
+        <strong>Perhatian!</strong> Pelanggan dimohon untuk memberikan konfirmasi kehadiran sebelum waktu reservasi.
+        Pembatalan hanya dapat dilakukan paling lambat 3 hari sebelum waktu reservasi.
+        Jika pelanggan membatalkan reservasi, DP yang sudah dibayarkan tidak dapat dikembalikan (hangus).
+        Reservasi yang dibuat kurang dari 3 hari sebelum waktu kedatangan tidak dapat dibatalkan.
+    </div>
 
     <!-- Daftar Pesanan Menu -->
     <table class="item-table">

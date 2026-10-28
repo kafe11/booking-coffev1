@@ -38,12 +38,11 @@ class PesananController extends Controller
 
         $tanggalHariIni = now()->startOfDay();
         foreach ($pesananSukses as $transaksi) {
-            $tanggalReservasi = $transaksi->tanggal_reservasi
-                ? \Illuminate\Support\Carbon::parse($transaksi->tanggal_reservasi)->startOfDay()
+            $tanggalWaktuReservasi = ($transaksi->tanggal_reservasi && $transaksi->waktu_reservasi)
+                ? \Illuminate\Support\Carbon::parse($transaksi->tanggal_reservasi . ' ' . $transaksi->waktu_reservasi)
                 : null;
-            $transaksi->aksi_reservasi_tersedia = $tanggalReservasi
-                && $tanggalReservasi->greaterThanOrEqualTo($tanggalHariIni)
-                && $tanggalReservasi->lessThanOrEqualTo($tanggalHariIni->copy()->addDays(3))
+            $transaksi->aksi_reservasi_tersedia = $tanggalWaktuReservasi
+                && now()->lessThan($tanggalWaktuReservasi->copy()->subDays(3))
                 && !in_array(strtolower((string) $transaksi->status_kehadiran), ['dibatalkan', 'hadir'], true);
         }
 
@@ -124,11 +123,11 @@ class PesananController extends Controller
             return redirect()->route('pesanan.riwayat')->with('gagal', 'Reservasi tidak ditemukan.');
         }
 
-        $tanggalReservasi = \Illuminate\Support\Carbon::parse($reservasi->tanggal)->startOfDay();
-        $hariIni = now()->startOfDay();
+        $tanggalWaktuReservasi = \Illuminate\Support\Carbon::parse($reservasi->tanggal . ' ' . $reservasi->waktu);
+        $batasKonfirmasi = $tanggalWaktuReservasi->copy()->subDays(3);
 
-        if ($tanggalReservasi->lt($hariIni) || $tanggalReservasi->gt($hariIni->copy()->addDays(3))) {
-            return redirect()->route('pesanan.riwayat')->with('gagal', 'Konfirmasi kehadiran atau pembatalan hanya tersedia mulai 3 hari sebelum tanggal reservasi hingga hari reservasi.');
+        if (now()->greaterThanOrEqualTo($batasKonfirmasi)) {
+            return redirect()->route('pesanan.riwayat')->with('gagal', 'Konfirmasi kehadiran dan pembatalan harus dilakukan paling lambat 3 hari sebelum waktu reservasi.');
         }
 
         if (strtolower((string) $reservasi->status_kehadiran) === 'dibatalkan' || strtolower((string) $transaksi->status) === 'batal') {
