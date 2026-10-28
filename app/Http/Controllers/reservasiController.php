@@ -100,7 +100,7 @@ class reservasiController extends Controller
             'nama' => 'required',
             'no_hp' => 'required',
             'waktu' => 'required',
-            'jumlah_tamu' => 'required|numeric',
+            'jumlah_tamu' => 'required|integer|min:1',
             // 'jumlah_meja' => 'required|numeric',
             'tanggal' => 'required',
 
@@ -122,7 +122,22 @@ class reservasiController extends Controller
 
         // dd($totalQty);
 
-        $jumlahTamu = $request->jumlah_tamu;
+        $jumlahTamu = (int) $request->jumlah_tamu;
+
+        // Kapasitas dihitung dari kursi meja Indoor yang tersedia pada tanggal dan jam pilihan.
+        $availability = app(\App\Support\TableAvailability::class);
+        $mejaIndoorTersedia = $availability->availableTableIds('Indoor', $request->tanggal, $request->waktu);
+        $kapasitasIndoorTersedia = (int) DB::table('meja')
+            ->whereIn('id_meja', $mejaIndoorTersedia)
+            ->sum('kapasitas');
+
+        if ($jumlahTamu > $kapasitasIndoorTersedia) {
+            return back()->withInput()->with(
+                'gagal',
+                "Jumlah tamu melebihi kapasitas kursi Indoor yang tersedia. Kursi tersedia untuk tanggal "
+                    . $request->tanggal . " pukul " . $request->waktu . " hanya {$kapasitasIndoorTersedia} orang."
+            );
+        }
         // $jumlahMeja = $request->jumlah_meja;
 
         if ($totalQty < $jumlahTamu) {
