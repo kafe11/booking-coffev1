@@ -143,9 +143,6 @@ class reservasiController extends Controller
         if ($totalQty < $jumlahTamu) {
             return back()->with('gagal', 'pastikan setiap tamu memesan makanan atau minuman minimal 1 pesanan, total pesanan anda: ' . $totalQty . ' total tamu yang anda inputkan ' . $jumlahTamu);
         }
-        if ($jumlahTamu > 10) {
-            return back()->with('gagal', 'Jumlah tamu maximal 10.');
-        }
         if ($jumlahTamu == 1 && $totalQty < 2) {
             return back()->with('gagal', 'pastikan jika Jumlah tamu 1, maka total pesanan minimal 2');
         }
