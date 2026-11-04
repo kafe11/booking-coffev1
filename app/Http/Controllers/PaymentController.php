@@ -220,7 +220,13 @@ class PaymentController extends Controller
             ];
 
             if (Schema::hasColumn('reservasi', 'status_kehadiran')) {
-                $reservasiData['status_kehadiran'] = 'belum_hadir';
+                $waktuReservasi = \\Illuminate\\Support\\Carbon::parse($dataReservasi['tanggal'] . ' ' . $dataReservasi['waktu']);
+                // Reservasi yang dibuat dalam rentang 3 hari ke depan tidak
+                // memerlukan konfirmasi pelanggan; tandai sebagai hadir otomatis.
+                $reservasiData['status_kehadiran'] = $waktuReservasi->greaterThan(now())
+                    && $waktuReservasi->lessThanOrEqualTo(now()->copy()->addDays(3))
+                    ? 'hadir'
+                    : 'belum_hadir';
             }
 
             $reservasi = reservasi::create($reservasiData);
