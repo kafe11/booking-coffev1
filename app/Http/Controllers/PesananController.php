@@ -127,7 +127,7 @@ class PesananController extends Controller
         $batasKonfirmasi = $tanggalWaktuReservasi->copy()->subDays(3);
 
         if (now()->greaterThanOrEqualTo($batasKonfirmasi)) {
-            return redirect()->route('pesanan.riwayat')->with('gagal', 'Konfirmasi kehadiran dan pembatalan harus dilakukan paling lambat 3 hari sebelum waktu reservasi.');
+            return redirect()->route('pesanan.riwayat')->with('gagal', 'Pembatalan hanya tersedia untuk reservasi minimal 3 hari sebelum tanggal reservasi. Reservasi hari ini hingga H+3 tidak dapat dibatalkan. Dimohon hadir sesuai jadwal reservasi yang telah ditentukan.');
         }
 
         if (strtolower((string) $reservasi->status_kehadiran) === 'dibatalkan' || strtolower((string) $transaksi->status) === 'batal') {

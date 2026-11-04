@@ -135,7 +135,7 @@
                                                 </form>
                                             </div>
                                         @else
-                                            <span class="text-xs text-gray-500 dark:text-gray-400">Konfirmasi kehadiran dan pembatalan tersedia mulai 3 hari sebelum tanggal reservasi.</span>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">Pembatalan hanya tersedia untuk reservasi minimal 3 hari sebelum tanggal reservasi. Reservasi hari ini hingga H+3 tidak dapat dibatalkan. Dimohon hadir sesuai jadwal reservasi yang telah ditentukan.</span>
                                         @endif
                                     </div>
                                 </div>
