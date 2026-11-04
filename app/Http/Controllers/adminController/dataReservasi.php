@@ -272,19 +272,4 @@ class dataReservasi extends Controller
         }
     }
 
-    public function ubahStatusTransaksi(Request $request)
-    {
-        // dd($request->all());
-
-        $id_reservasi = $request->id_reservasi;
-
-        DB::table('transaksi')
-            ->where('id_reservasi', $id_reservasi) // Cari data yang mau diupdate
-            ->update([
-                'status' => 'selesai',
-                'updated_at' => now(), // Manual karena Query Builder tidak otomatis mengisi timestamps
-            ]);
-
-        return redirect()->back()->with('success', 'meja sudah dikosongkan!');
-    }
 }

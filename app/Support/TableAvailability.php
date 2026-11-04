@@ -120,8 +120,10 @@ class TableAvailability
                     || Carbon::parse($booking->transaksi_created_at)->addMinutes(self::PAYMENT_HOLD_MINUTES)->lessThanOrEqualTo(now())) {
                     continue;
                 }
-            } elseif (!in_array($status, ['tervalidasi', 'selesai'], true)) {
-                // Unknown or missing transaction status does not reserve a table.
+            } elseif ($status !== 'tervalidasi') {
+                // Hanya reservasi yang sudah membayar DP dan belum melunasi
+                // yang tetap menahan meja. Status selesai berarti pelunasan
+                // berhasil dan meja otomatis tersedia kembali.
                 continue;
             }
 

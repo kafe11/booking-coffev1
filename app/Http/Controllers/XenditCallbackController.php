@@ -108,9 +108,19 @@ class XenditCallbackController extends Controller
                 }
 
                 if ($isPelunasan) {
-                    // Retry callback pelunasan tidak boleh menambah total/stok dua kali.
-                    if (strtolower((string) $order->status) === 'selesai') {
+                    // Pelunasan hanya sah setelah pembayaran DP tervalidasi.
+                    // Callback yang dikirim ulang tidak boleh memproses stok/total dua kali.
+                    $currentStatus = strtolower((string) $order->status);
+                    if ($currentStatus === 'selesai') {
                         return 'duplicate';
+                    }
+                    if ($currentStatus !== 'tervalidasi') {
+                        Log::warning('Callback pelunasan diterima untuk transaksi yang belum tervalidasi.', [
+                            'external_id' => $externalId,
+                            'id_transaksi' => $transactionId,
+                            'status_transaksi' => $currentStatus,
+                        ]);
+                        return 'settlement_not_ready';
                     }
 
                     // Potong stok hanya untuk qty tambahan yang belum pernah diproses.
