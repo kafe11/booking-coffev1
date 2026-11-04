@@ -32,26 +32,39 @@ class TableAvailability
             return [];
         }
 
-        // Prefer a combination with less unused capacity by considering smaller
-        // available tables first. All selected tables remain in the same room.
+        // Find the smallest sufficient capacity; for equal capacity prefer
+        // fewer tables, then stable table IDs. This supports any number of tables.
         $tables = DB::table('meja')
             ->whereIn('id_meja', $availableIds)
             ->orderBy('kapasitas')
             ->orderBy('id_meja')
             ->get(['id_meja', 'kapasitas']);
 
-        $selected = [];
-        $capacity = 0;
+        // Dynamic programming: capacity => selected table IDs.
+        $combinations = [0 => []];
         foreach ($tables as $table) {
-            $selected[] = $table->id_meja;
-            $capacity += (int) $table->kapasitas;
+            $capacity = (int) $table->kapasitas;
+            foreach ($combinations as $sum => $ids) {
+                $newCapacity = $sum + $capacity;
+                if ($newCapacity > $guests + $tables->sum('kapasitas')) {
+                    continue;
+                }
 
-            if ($capacity >= $guests) {
-                return $selected;
+                $candidate = [...$ids, $table->id_meja];
+                if (!isset($combinations[$newCapacity])
+                    || count($candidate) < count($combinations[$newCapacity])) {
+                    $combinations[$newCapacity] = $candidate;
+                }
             }
         }
 
-        return [];
+        $sufficientCapacities = array_filter(array_keys($combinations), fn ($capacity) => $capacity >= $guests);
+        if (empty($sufficientCapacities)) {
+            return [];
+        }
+
+        sort($sufficientCapacities);
+        return $combinations[$sufficientCapacities[0]];
     }
 
     public function availableTableIds(string $room, string $date, string $time, bool $lock = false): array
