@@ -327,34 +327,37 @@
         const totalSlides = slides.length;
 
         function updateCarousel() {
+            if (!track || totalSlides === 0) return;
             track.style.transform = `translateX(-${currentSlide * 100}%)`;
         }
 
         function moveSlide(direction) {
+            if (!track || totalSlides < 2) return;
             currentSlide = (currentSlide + direction + totalSlides) % totalSlides;
             updateCarousel();
         }
-        setInterval(() => {
-            moveSlide(1);
-        }, 5000);
 
+        // Autoplay hanya aktif jika halaman benar-benar memiliki carousel.
+        if (track && totalSlides > 1) {
+            setInterval(() => moveSlide(1), 5000);
+        }
 
-    document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function () {
             const hamburger = document.getElementById('hamburgerBtn');
             const mobileMenu = document.getElementById('mobileMenu');
 
-                hamburger.addEventListener('click', () => {
-                    mobileMenu.classList.toggle('hidden');
-                });
+            if (!hamburger || !mobileMenu) return;
 
-        // Tutup menu saat klik di luar
-                document.addEventListener('click', (e) => {
-                    if (!mobileMenu.contains(e.target) && !hamburger.contains(e.target)) {
-                        mobileMenu.classList.add('hidden');
-                    }
-                });
+            hamburger.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!mobileMenu.contains(e.target) && !hamburger.contains(e.target)) {
+                    mobileMenu.classList.add('hidden');
+                }
+            });
         });
-
     </script>
     @stack('extra-scripts')
 
