@@ -52,19 +52,13 @@
     @endif
     @if (session('success'))
         <div
-            class="mb-4 flex items-center gap-3 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-red-700 shadow-sm">
-            <!-- Icon -->
+            class="mb-4 flex items-center gap-3 rounded-lg border border-green-300 bg-green-50 px-4 py-3 text-green-700 shadow-sm">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
                 stroke="currentColor" class="h-6 w-6">
                 <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M12 9v3m0 4h.01M4.93 4.93l14.14 14.14M1 12C1 5.924 5.924 1 12 1s11 4.924 11 11-4.924 11-11 11S1 18.076 1 12z" />
+                    d="M5 13l4 4L19 7" />
             </svg>
-
-            <!-- Text -->
-            <span>
-                {{-- <strong class="font-semibold">Berhasil</strong> --}}
-                {{ session('success') }}
-            </span>
+            <span>{{ session('success') }}</span>
         </div>
     @endif
     {{-- <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm"
@@ -106,9 +100,15 @@
                     <p class="text-slate-600 dark:text-slate-400 mt-2">Welcome back, please log in.</p>
                 </div>
                 @if (session('gagal'))
-                    <div class="alert alert-danger">
-                        {{-- Menampilkan nilai dari session('gagal') --}}
-                        <strong>Gagal!</strong> {{ session('gagal') }}
+                    <div
+                        class="mb-4 flex items-center gap-3 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-red-700 shadow-sm"
+                        role="alert">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                            stroke="currentColor" class="h-6 w-6 shrink-0">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 9v3m0 4h.01M10.29 3.86l-7.5 13A1 1 0 003.66 18h16.68a1 1 0 00.87-1.5l-7.5-13a1 1 0 00-1.74 0z" />
+                        </svg>
+                        <span><strong class="font-semibold">Gagal!</strong> {{ session('gagal') }}</span>
                     </div>
                 @endif
                 <form action="{{ route('login-pelanggan') }}" class="space-y-6" method="POST">
