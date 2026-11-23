@@ -5,7 +5,7 @@
 @section('content')
 
     @if (session('success'))
-        <div class="mb-4 flex items-center bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded shadow-md animate-pulse"
+        <div class="mb-4 flex items-center gap-3 rounded-lg border border-green-300 bg-green-50 px-4 py-3 text-green-700 shadow-sm"
             role="alert">
             <span class="material-symbols-outlined mr-2">check_circle</span>
             <p class="font-medium">{{ session('success') }}</p>
@@ -13,7 +13,7 @@
     @endif
 
     @if (session('gagal'))
-        <div class="mb-4 flex items-center bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-md animate-bounce"
+        <div class="mb-4 flex items-center gap-3 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-red-700 shadow-sm"
             role="alert">
             <span class="material-icons mr-2">error_outline</span>
             <p class="font-medium">{{ session('gagal') }}</p>
