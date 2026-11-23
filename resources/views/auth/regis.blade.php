@@ -114,7 +114,7 @@
                 </div>
             </form>
             @if ($errors->any())
-                <div class="mt-4 p-3 bg-red-100 text-red-700 rounded">
+                <div class="mb-4 flex items-center gap-3 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-red-700 shadow-sm">
                     <ul>
                         @foreach ($errors->all() as $err)
                             <li>{{ $err }}</li>

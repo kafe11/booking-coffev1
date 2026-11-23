@@ -11,7 +11,7 @@
         <div class="max-w-2xl  bg-white  dark:bg-surface-dark rounded-lg shadow-lg p-6 sm:p-8 md:p-12">
 
             @if (session('success'))
-                <div class="alert alert-success">{{ session('success') }}</div>
+                <div class="mb-4 flex items-center gap-3 rounded-lg border border-green-300 bg-green-50 px-4 py-3 text-green-700 shadow-sm">{{ session('success') }}</div>
             @endif
 
             <h1 class="text-3xl md:text-4xl font-bold text-center mb-8 text-primary">Tambah Menu Makanan</h1>

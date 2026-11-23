@@ -15,21 +15,21 @@
 
     {{-- Success/Error Messages --}}
     @if (session('success'))
-        <div class="bg-green-500 text-white px-6 py-4 rounded-lg shadow mb-6 flex items-center gap-3">
+        <div class="mb-4 flex items-center gap-3 rounded-lg border border-green-300 bg-green-50 px-4 py-3 text-green-700 shadow-sm">
             <span class="material-symbols-outlined">check_circle</span>
             <span>{{ session('success') }}</span>
         </div>
     @endif
 
     @if (session('error'))
-        <div class="bg-red-500 text-white px-6 py-4 rounded-lg shadow mb-6 flex items-center gap-3">
+        <div class="mb-4 flex items-center gap-3 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-red-700 shadow-sm">
             <span class="material-symbols-outlined">error</span>
             <span>{{ session('error') }}</span>
         </div>
     @endif
 
     @if ($errors->any())
-        <div class="bg-red-500 text-white px-6 py-4 rounded-lg shadow mb-6">
+        <div class="mb-4 flex items-center gap-3 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-red-700 shadow-sm">
             <div class="flex items-center gap-3 mb-2">
                 <span class="material-symbols-outlined">error</span>
                 <span class="font-semibold">Terjadi kesalahan:</span>

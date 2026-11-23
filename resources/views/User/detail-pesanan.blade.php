@@ -159,13 +159,13 @@
                 </div>
 
                 @if (session('success'))
-                    <div class="p-3 mb-4 bg-green-500 text-white rounded">
+                    <div class="mb-4 flex items-center gap-3 rounded-lg border border-green-300 bg-green-50 px-4 py-3 text-green-700 shadow-sm">
                         {{ session('success') }}
                     </div>
                 @endif
 
                 @if (session('gagal'))
-                    <div class="p-3 mb-4 bg-red-500 text-white rounded">
+                    <div class="mb-4 flex items-center gap-3 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-red-700 shadow-sm">
                         {{ session('gagal') }}
                     </div>
                 @endif

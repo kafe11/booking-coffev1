@@ -7,7 +7,7 @@
     <div class="w-full max-w-2xl bg-white rounded-xl shadow-lg p-6 sm:p-8">
         <h1 class="text-2xl font-bold text-center text-primary mb-8">Edit Data Meja</h1>
         @if ($errors->any())
-            <div class="mb-6 rounded-lg bg-red-100 text-red-700 px-4 py-3 text-sm">
+            <div class="mb-4 flex items-center gap-3 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-red-700 shadow-sm">
                 <ul>@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
             </div>
         @endif
