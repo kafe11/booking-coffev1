@@ -6,7 +6,7 @@
 <h2 class="text-2xl font-bold text-gray-800 mb-6">Data Meja</h2>
 
 @if (session('success'))
-    <div class="mb-4 rounded-lg bg-green-100 text-green-700 px-4 py-3">{{ session('success') }}</div>
+    <div class="mb-4 flex items-center gap-3 rounded-lg border border-green-300 bg-green-50 px-4 py-3 text-green-700 shadow-sm">{{ session('success') }}</div>
 @endif
 
 <div class="space-y-6">
