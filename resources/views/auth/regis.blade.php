@@ -93,7 +93,7 @@
                     <div class="mt-1">
                         <input autocomplete="password"
                             class="block w-full rounded-DEFAULT border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-primary focus:border-primary transition duration-150 ease-in-out"
-                            id="password" name="password" type="password" />
+                            id="password" name="password" type="password" maxlength="12" />
                     </div>
                 </div>
                 <div>
@@ -102,7 +102,7 @@
                     <div class="mt-1">
                         <input autocomplete="password"
                             class="block w-full rounded-DEFAULT border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-primary focus:border-primary transition duration-150 ease-in-out"
-                            id="password_confirmation" name="password_confirmation" type="password" />
+                            id="password_confirmation" name="password_confirmation" type="password" maxlength="12" />
                     </div>
                 </div>
                 <div>
